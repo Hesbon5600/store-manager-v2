@@ -5,7 +5,7 @@ from instance.config import app_config
 import jwt
 from .models import *
 from .utils import *
-from .models import User
+from .models import User, PostProduct
 from werkzeug.security import check_password_hash
 import datetime
 
@@ -13,6 +13,9 @@ import datetime
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        user_obj = User()
+        users = user_obj.get_all_users()
+        # print(users)
         token = None
         current_user = None
         if 'x-access-token' in request.headers:
@@ -22,11 +25,14 @@ def token_required(f):
                 'Message': 'Token is missing, You must login first'
             }), 401)
         try:
-            data = jwt.decode(token, app_config['development'].SECRET_KEY)
+            data = jwt.decode(token, app_config['development'].SECRET_KEY, algorithms=['HS256'])
+
             for user in users:
                 if user['username'] == data['username']:
                     current_user = user
-        except:
+                    # print(current_user)
+        except Exception as e:
+            print(e)
             return make_response(jsonify({'Message': 'Token is invalid'}),
                                  403)
         return f(current_user, *args, **kwargs)
@@ -72,7 +78,7 @@ class UserLogin(Resource):
                 token = jwt.encode({'username': user['username'],
                                     'exp': datetime.datetime.utcnow() +
                                     datetime.timedelta(minutes=3000)},
-                                   app_config['development'].SECRET_KEY)
+                                   app_config['development'].SECRET_KEY, algorithm='HS256')
                 return make_response(jsonify({
                                              'token': token.decode('UTF-8')
                                              }), 200)

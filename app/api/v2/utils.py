@@ -63,3 +63,58 @@ class ValidateUser(User):
         elif not re.search("[#@$]", self.password):
             message = "Password must have one of the special charater [#@$]"
             abort(400, message)
+
+
+class ValidateProduct():
+    def __init__(self, data):
+        self.title = data['title']
+        self.category = data['category']
+        self.description = data['description']
+        self.quantity = data['quantity']
+        self.price = data['price']
+        self.lower_inventory = data['lower_inventory']
+
+    def validate_duplicates(self):
+        self.prod_obj = PostProduct.get_all_products(self)
+        for product in self.prod_obj:
+            if product['title'] == self.title:
+                message = "Product: '" + self.title + "' already exists"
+                abort(406, message)
+
+    def validate_product_details(self):
+
+        if type(self.title) != str:
+            message = "Product title must be a string"
+            abort(400, message)
+
+        if type(self.category) != str:
+            message = "Product Category must be a string"
+            abort(400, message)
+
+        if type(self.description) != str:
+            message = "Product Description must be a string"
+            abort(400, message)
+
+        if type(self.quantity) != int:
+            message = "Product quantity price must be a real number"
+            abort(400, message)
+        if self.quantity < 0:
+            message = "Product Quantity should be a positive value value"
+            abort(400, message)
+
+        if type(self.price) != float:
+            message = "Product price must be of the format 00.00"
+            abort(400, message)
+        if self.price < 0:
+            message = "Product price should be a positive value"
+            abort(400, message)
+
+        if type(self.lower_inventory) != int:
+            message = "Product lower inventory must be a real number"
+            abort(400, message)
+        if self.lower_inventory < 0:
+            message = "Product price should be a positive value"
+            abort(400, message)
+        if self.lower_inventory > self.quantity:
+            message = "Lower inventory should be less than the quantity"
+            abort(400, message)
