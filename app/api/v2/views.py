@@ -137,3 +137,26 @@ class Product(Resource):
                     'My Products': product
                 }), 201)
 
+
+class SingleProduct(Resource):
+    # Get a single product
+    @token_required
+    def get(current_user, self, productID):
+        self.prod_obj = PostProduct.get_all_products(self)
+        if current_user:
+            for product in self.prod_obj:
+                if product['product_id'] == int(productID):
+                    return make_response(jsonify({
+                        'Status': 'Ok',
+                        'Message': "Success",
+                        'My product': product
+                    }), 200)
+
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "No such product"
+            }), 404)
+        return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "You must be logged in first"
+            }), 401)
