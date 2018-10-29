@@ -40,7 +40,7 @@ class BaseTest(unittest.TestCase):
         })
         # Product details
         self.product = json.dumps({
-            "title": "Panga Soap",
+            "title": "Pangahgh Soap",
             "category": "toilateries",
             "description": "description for omo",
             "lower_inventory": 1,
@@ -58,7 +58,7 @@ class BaseTest(unittest.TestCase):
                                             data=self.admin_login_details,
                                             content_type='application/json')
         self.admin_token = json.loads(login_admin.data.decode())
-        print(self.admin_token)
+        # print(self.admin_token)
         # Signup attendant
         signup_attendant = self.test_client.post("/api/v2/auth/signup",
                                                  data=self.attendant_info,
@@ -71,11 +71,11 @@ class BaseTest(unittest.TestCase):
                                             content_type='application/json')
         self.attendant_token = json.loads(login_attendant.data.decode())
 
-        # self.test_client.post("/api/v2/products",
-        #                                  data=self.product,
-        #                                  headers={
-        #                                      'content-type': 'application/json'
-        #                                    })
+        self.test_client.post("/api/v2/products",
+                                         data=self.product,
+                                         headers={'x-access-token': self.admin_token['token'],
+                                             'content-type': 'application/json'
+                                           })
 
         self.context = self.app.app_context()
         self.context.push()

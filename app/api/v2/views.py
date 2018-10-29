@@ -90,19 +90,41 @@ class UserLogin(Resource):
 
 
 class Product(Resource):
- 
+    # Get all products
+    @token_required
+    def get(current_user, self):
+        self.prod_obj = PostProduct.get_all_products(self)
+
+        if current_user:
+            if len(self.prod_obj) < 1:
+                response = make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "No avilable products"
+                }), 404)
+            else:
+                response = make_response(jsonify({
+                    'Status': 'Ok',
+                    'Message': "Success",
+                    'My products': self.prod_obj
+                }), 200)
+        else:
+            response = make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "You must first login"
+            }), 401)
+        return response
+
     @token_required
     def post(current_user, self):
         data = request.get_json()
-        # print(current_user)
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
                 'Status': 'Failed',
                 'Message': "You must be an admin"
             }), 401)
         if current_user and current_user['role'] == "admin":
-            # valid_product = ValidateProduct(data)
-            # valid_product.validate_product_details()
+            valid_product = ValidateProduct(data)
+            valid_product.validate_product_details()
             product = PostProduct(data)
             product.save_product()
 
@@ -112,5 +134,6 @@ class Product(Resource):
                 return make_response(jsonify({
                     'Status': 'Ok',
                     'Message': "Product created Successfully",
-                    'My Products': self.prod_obj
+                    'My Products': product
                 }), 201)
+

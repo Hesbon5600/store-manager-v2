@@ -18,10 +18,10 @@ class Dtb():
         try:
             if os.getenv("APP_SETTINGS") == "testing":
                 self.conn = psycopg2.connect(database="test_dtb",
-                                             password=self.db_password,
-                                             user=self.db_user,
-                                             host=self.db_host
-                                             )
+                password=self.db_password,
+                user=self.db_user,
+                host=self.db_host
+                )
             if os.getenv("APP_SETTINGS") == "development":
                 self.conn = psycopg2.connect(
                     database=self.db_name,
@@ -29,8 +29,6 @@ class Dtb():
                     user=self.db_user,
                     host=self.db_host
                 )
-
-            self.conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='require')
 
         except Exception as e:
             print(e)
@@ -50,7 +48,6 @@ class Dtb():
                 CREATE TABLE IF NOT EXISTS products (product_id serial PRIMARY KEY,
                 title varchar(30) not null,
                 description varchar(100) not null,
-                category varchar(30) not null,
                 price float(4) not null,
                 quantity int not null,
                 lower_inventory int not null)
@@ -58,7 +55,7 @@ class Dtb():
 
             """
                 CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
-                attendant_id int REFERENCES users(user_id) not null,
+                user_id int REFERENCES users(user_id) not null,
                 product_id int REFERENCES products(product_id) not null)
             """
         ]
@@ -84,49 +81,6 @@ class Dtb():
         self.conn.commit()
         self.conn.close()
 
-
-class User(Dtb):
-    def __init__(self, data=None):
-        if data:
-            # print(data)
-            self.username = data['username']
-            self.password = generate_password_hash(data['password'])
-            self.email = data['email']
-            self.role = data['role']
-            db = Dtb()
-            db.create_tables()
-
-            self.conn = db.connection()
-
-    def save_user(self):
-        cur = self.conn.cursor()
-
-        cur.execute(
-            "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
-            (self.username, self.email, self.password, self.role),
-        )
-        self.conn.commit()
-        self.conn.close()
-
-    def get_all_users(self):
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
-        cur = self.conn.cursor()
-        cur.execute("SELECT * FROM users")
-        result = cur.fetchall()
-        users = []
-        for user in result:
-            single_user = {}
-            single_user['user_id'] = user[0]
-            single_user["username"] = user[1]
-            single_user["email"] = user[2]
-            single_user["password"] = user[3]
-            single_user['role'] = user[4]
-            users.append(single_user)
-
-        self.conn.close()
-        return users
 
 class User(Dtb):
     def __init__(self, data=None):
@@ -182,50 +136,6 @@ class PostProduct():
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
         print(data)
-        db = Dtb()
-        db.create_tables()
-        self.conn = db.connection()
-
-    def save_product(self):
-
-        cur = self.conn.cursor()
-
-        cur.execute(
-            "INSERT INTO products (title, description, price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s)",
-            (self.title, self.description, self.price,
-             self.quantity, self.lower_inventory)
-        )
-        self.conn.commit()
-        self.conn.close()
-
-    def get_all_products(self):
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
-        cur = self.conn.cursor()
-        cur.execute("SELECT * FROM products")
-        result = cur.fetchall()
-        products = []
-        single_product = {}
-
-        for product in result:
-            single_product['product_id'] = product[0]
-            single_product["title"] = product[1]
-            single_product["description"] = product[2]
-            single_product["quantity"] = product[3]
-            single_product['lower_inventory'] = product[4]
-            products.append(single_product)
-
-        self.conn.close()
-        return products
-    def __init__(self, data):
-        print(data)
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
         db = Dtb()
         db.create_tables()
         self.conn = db.connection()
