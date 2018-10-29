@@ -1,7 +1,7 @@
 from .base_test import *
 
 
-class TestProducts(BaseTest, unittest.TestCase):
+class TestProducts(BaseTest):
 
     def test_admin_create_product(self):
         product = json.dumps({
@@ -16,7 +16,7 @@ class TestProducts(BaseTest, unittest.TestCase):
                                          data=product,
                                          headers={
                                              'content-type': 'application/json',
-                                            'x-access-token': self.admin_token['token']})
+                                             'x-access-token': self.admin_token['token']})
         # print(response.data)
         self.assertEqual(response.status_code, 200)
 
@@ -27,4 +27,13 @@ class TestProducts(BaseTest, unittest.TestCase):
                                          headers={
                                              'content-type': 'application/json',
                                              'x-access-token': self.attendant_token['token']})
+        self.assertEqual(response.status_code, 401)
+
+    def test_get_all_products(self):
+        response = self.test_client.get('/api/v2/products', headers={
+            'x-access-token': self.attendant_token['token']})
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_all_products_no_token(self):
+        response = self.test_client.get('/api/v2/products')
         self.assertEqual(response.status_code, 401)
