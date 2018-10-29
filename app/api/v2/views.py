@@ -90,7 +90,7 @@ class UserLogin(Resource):
 
 
 class Product(Resource):
- 
+
     @token_required
     def post(current_user, self):
         data = request.get_json()
