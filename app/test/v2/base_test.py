@@ -72,6 +72,7 @@ class BaseTest(unittest.TestCase):
         self.attendant_token = json.loads(login_attendant.data.decode())
 
         self.test_client.post("/api/v2/products",
+
                               data=self.product,
                               headers={'x-access-token': self.admin_token['token'],
                                        'content-type': 'application/json'
