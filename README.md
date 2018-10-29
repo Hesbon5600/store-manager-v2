@@ -1,9 +1,5 @@
 # store-manager-v2
 Store Manager is a web application that helps store owners manage sales and product inventory records. This application is meant for use in a single store.  
-
-[![Build Status](https://travis-ci.org/Hesbon5600/Store-Manager-V1.svg?branch=ft-get-single-sale-api-161310353)](https://travis-ci.org/Hesbon5600/Store-Manager-V1)
-[![Coverage Status](https://coveralls.io/repos/github/Hesbon5600/Store-Manager-V1/badge.svg?branch=ft-get-single-sale-api-161310353)](https://coveralls.io/github/Hesbon5600/Store-Manager-V1?branch=ft-get-single-sale-api-161310353)
-[![Maintainability](https://api.codeclimate.com/v1/badges/751babd9eca784e178b9/maintainability)](https://codeclimate.com/github/Hesbon5600/Store-Manager-V1/maintainability)  
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/694b6ed7daad7fca8e9f)
 
 Heroku link  
@@ -52,16 +48,16 @@ If you ran the application you can test the various api end points using postman
 
 |Endpoint|functionality|contraints(requirements)|
 |-------|-------------|----------|
-|post /api/v1/auth/signup|create a user|user information|
-|post /api/v1/auth/login | login |requires authentication |
-|get /api/v1/products| get all the products| pass a token |
-|get /api/v1/products/</productID>|return a single product| product id, pass token|
-|post /api/v1/products | create a new product entry| product data, pass token|
-|post /api/v1/sales | create a new sale| product id, pass token|
-|get /api/v1/sales | get all sales entries| pass token|
-|get/api/v1/sales/<saleID>|get a single sale entry| sale id, pass token| 
-|delete /api/v1/products/<productID> | delete a product| product id, pass token|
-|put /api/v1/products/<productID> | update a products|product id, product data, pass token|
+|post /api/v2/auth/signup|create a user|user information|
+|post /api/v2/auth/login | login |requires authentication |
+|get /api/v2/products| get all the products| pass a token |
+|get /api/v2/products/</productID>|return a single product| product id, pass token|
+|post /api/v2/products | create a new product entry| product data, pass token|
+|post /api/v2/sales | create a new sale| product id, pass token|
+|get /api/v2/sales | get all sales entries| pass token|
+|get/api/v2/sales/<saleID>|get a single sale entry| sale id, pass token| 
+|delete /api/v2/products/<productID> | delete a product| product id, pass token|
+|put /api/v2/products/<productID> | update a products|product id, product data, pass token|
 
 
 
