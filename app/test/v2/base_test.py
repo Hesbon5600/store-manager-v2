@@ -49,10 +49,10 @@ class BaseTest(unittest.TestCase):
         })
         # Signup admin
         self.signup_admin = self.test_client.post("/api/v2/auth/signup",
-                                                 data=self.admin_info,
-                                                 headers={
-                                                     'content-type': 'application/json'
-                                                 })
+                                                  data=self.admin_info,
+                                                  headers={
+                                                      'content-type': 'application/json'
+                                                  })
         # Login admin and get the token
         login_admin = self.test_client.post("/api/v2/auth/login",
                                             data=self.admin_login_details,
@@ -67,15 +67,16 @@ class BaseTest(unittest.TestCase):
                                                  })
 
         login_attendant = self.test_client.post("/api/v2/auth/login",
-                                            data=self.attendant_login_info,
-                                            content_type='application/json')
+                                                data=self.attendant_login_info,
+                                                content_type='application/json')
         self.attendant_token = json.loads(login_attendant.data.decode())
 
         self.test_client.post("/api/v2/products",
-                                         data=self.product,
-                                         headers={'x-access-token': self.admin_token['token'],
-                                             'content-type': 'application/json'
-                                           })
+
+                              data=self.product,
+                              headers={'x-access-token': self.admin_token['token'],
+                                       'content-type': 'application/json'
+                                       })
 
         self.context = self.app.app_context()
         self.context.push()
