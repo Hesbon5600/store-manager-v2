@@ -18,10 +18,10 @@ class Dtb():
         try:
             if os.getenv("APP_SETTINGS") == "testing":
                 self.conn = psycopg2.connect(database="test_dtb",
-                password=self.db_password,
-                user=self.db_user,
-                host=self.db_host
-                )
+                                             password=self.db_password,
+                                             user=self.db_user,
+                                             host=self.db_host
+                                             )
             if os.getenv("APP_SETTINGS") == "development":
                 self.conn = psycopg2.connect(
                     database=self.db_name,
@@ -48,6 +48,7 @@ class Dtb():
                 CREATE TABLE IF NOT EXISTS products (product_id serial PRIMARY KEY,
                 title varchar(30) not null,
                 description varchar(100) not null,
+                category varchar(30) not null,
                 price float(4) not null,
                 quantity int not null,
                 lower_inventory int not null)
@@ -89,9 +90,9 @@ class User(Dtb):
             self.username = data['username']
             self.password = generate_password_hash(data['password'])
             self.email = data['email']
+            self.role = data['role']
             db = Dtb()
             db.create_tables()
-            self.role = data['role']
 
             self.conn = db.connection()
 
@@ -128,26 +129,24 @@ class User(Dtb):
 
 
 class PostProduct():
-    def __init__(self, data):
+
+    def save_product(self, data):
         self.title = data['title']
         self.category = data['category']
         self.description = data['description']
         self.quantity = data['quantity']
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
-        print(data)
         db = Dtb()
         db.create_tables()
         self.conn = db.connection()
 
-    def save_product(self):
-
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO products (title, description, price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s)",
-            (self.title, self.description, self.price,
-             self.quantity, self.lower_inventory)
+            "INSERT INTO products (title, description, category, price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s, %s)",
+            (self.title, self.description, self.category, self.price,
+             self.quantity, self.lower_inventory),
         )
         self.conn.commit()
         self.conn.close()
@@ -172,3 +171,28 @@ class PostProduct():
 
         self.conn.close()
         return products
+
+    def update_product(self, data, productId):
+        self.title = data['title']
+        self.category = data['category']
+        self.description = data['description']
+        self.quantity = data['quantity']
+        self.price = data['price']
+        self.lower_inventory = data['lower_inventory']
+        self.poductID = productId
+
+        db = Dtb()
+        self.conn = db.connection()
+        db.create_tables()
+        cur = self.conn.cursor()
+        cur.execute("SELECT * FROM products WHERE title = %s ", (self.title,))
+        row = cur.fetchall()
+        if row:
+            return make_response(jsonify({"message": "Item with the title already exists"}), 400)
+        cur.execute(
+            "UPDATE products SET title = %s , description = %s, category = %s, price = %s, quantity = %s, lower_inventory = %s WHERE product_id = %s",
+            (self.title, self.description, self.category, self.price,
+             self.quantity, self.lower_inventory, self.poductID)
+        )
+        self.conn.commit()
+        self.conn.close()
