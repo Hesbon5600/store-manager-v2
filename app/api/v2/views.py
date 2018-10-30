@@ -64,7 +64,7 @@ class UserLogin(Resource):
         username = data['username']
         password = data['password']
 
-        if not data or not username or not password:
+        if not data or not username or not password or 'username' not in data or 'password' not in data:
             return make_response(jsonify({
                                          'Status': 'Failed',
                                          'Message': "Login required"
@@ -224,6 +224,7 @@ class Sale(Resource):
     def post(current_user, self):
         total = 0
         data = request.get_json()
+        print(current_user)
         if not data or not data['product_id']:
             return make_response(jsonify({
                                          'Status': 'Failed',
@@ -290,3 +291,5 @@ class Sale(Resource):
             'Status': 'Failed',
             'Message': "You must be an admin"
         }), 403)
+
+
