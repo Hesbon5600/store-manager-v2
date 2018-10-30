@@ -232,6 +232,7 @@ class PostSale(Dtb):
             single_sale = {}
             single_sale['sale_id'] = product[0]
             single_sale["attendant_id"] = product[1]
+            single_sale['product_id'] = product[2]
             sales.append(single_sale)
 
         self.conn.close()

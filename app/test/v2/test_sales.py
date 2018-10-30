@@ -43,3 +43,13 @@ class TestSales(BaseTest):
                                              'x-access-token': self.attendant_token['token']})
 
         self.assertEqual(response.status_code, 404)
+
+    def test_admin_get_all_sales(self):
+        response = self.test_client.get('/api/v2/sales', headers={
+            'x-access-token': self.admin_token['token']})
+        self.assertEqual(response.status_code, 200)
+
+    def test_attendant_get_all_sales(self):
+        response = self.test_client.get('/api/v2/sales', headers={
+            'x-access-token': self.attendant_token['token']})
+        self.assertEqual(response.status_code, 403)
