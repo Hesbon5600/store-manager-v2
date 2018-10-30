@@ -159,3 +159,25 @@ class SingleProduct(Resource):
                 'Message': "You must be logged in first"
             }), 401)
 
+    @token_required
+    def put(current_user, self, productID):
+        self.product_Id = int(productID)
+        data = request.get_json()
+        if current_user and current_user['role'] != "admin":
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "You must be an admin"
+            }), 401)
+        if current_user and current_user['role'] == "admin":
+            valid_product = ValidateProduct(data)
+            valid_product.validate_product_details()
+            product = PostProduct()
+            product.update_product(data, self.product_Id)
+
+            self.prod_obj = PostProduct.get_all_products(self)
+            for product in self.prod_obj:
+                return make_response(jsonify({
+                    'Status': 'Ok',
+                    'Message': "Product created Successfully",
+                    'My Products': product
+                }), 201)
