@@ -15,7 +15,6 @@ def token_required(f):
     def decorated(*args, **kwargs):
         user_obj = User()
         users = user_obj.get_all_users()
-        # print(users)
         token = None
         current_user = None
         if 'x-access-token' in request.headers:
@@ -30,7 +29,6 @@ def token_required(f):
             for user in users:
                 if user['username'] == data['username']:
                     current_user = user
-                    # print(current_user)
         except Exception as e:
             print(e)
             return make_response(jsonify({'Message': 'Token is invalid'}),
@@ -124,18 +122,18 @@ class Product(Resource):
             }), 401)
         if current_user and current_user['role'] == "admin":
             valid_product = ValidateProduct(data)
+            valid_product.validate_duplicates()
             valid_product.validate_product_details()
-            product = PostProduct(data)
-            product.save_product()
+            product = PostProduct()
+            product.save_product(data)
 
             self.prod_obj = PostProduct.get_all_products(self)
-            print("self.prod_obj")
             for product in self.prod_obj:
                 return make_response(jsonify({
                     'Status': 'Ok',
                     'Message': "Product created Successfully",
                     'My Products': product
-                }), 201)
+                }), 200)
 
 
 class SingleProduct(Resource):
@@ -160,3 +158,4 @@ class SingleProduct(Resource):
                 'Status': 'Failed',
                 'Message': "You must be logged in first"
             }), 401)
+

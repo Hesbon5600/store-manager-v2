@@ -1,7 +1,7 @@
 from .base_test import *
 
 
-class TestUser(BaseTest, unittest.TestCase):
+class TestUser(BaseTest):
     def test_admin__signup(self):
         admin_info = json.dumps({
             "username": "heSbon52",

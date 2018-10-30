@@ -74,13 +74,15 @@ class ValidateProduct():
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
 
-    def validate_product_details(self):
+    def validate_duplicates(self):
         self.prod_obj = PostProduct.get_all_products(self)
         print("self.prod_obj")
         for product in self.prod_obj:
             if product['title'] == self.title:
                 message = "Product: '" + self.title + "' already exists"
                 abort(406, message)
+
+    def validate_product_details(self):
 
         if type(self.title) != str:
             message = "Product title must be a string"
