@@ -267,3 +267,26 @@ class Sale(Resource):
                                          'Status': 'Failed',
                                          'Message': "You must be an attendant"
                                          }), 403)
+
+    # Get all sale entries
+    @token_required
+    def get(current_user, self):
+        if current_user['role'] == "admin":
+            self.sale_obj = PostSale.get_all_sales(self)
+            if len(self.sale_obj) > 0:
+                response = make_response(jsonify({
+                    'Status': 'Ok',
+                    'Message': "Success",
+                    'My Sales': self.sale_obj
+                }), 200)
+            else:
+                response = make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "No sales made"
+                }), 404)
+            return response
+
+        return make_response(jsonify({
+            'Status': 'Failed',
+            'Message': "You must be an admin"
+        }), 403)
