@@ -217,3 +217,53 @@ class SingleProduct(Resource):
                 'Message': "No avilable products"
             }), 404)
 
+
+class Sale(Resource):
+    # Make a sales
+    @token_required
+    def post(current_user, self):
+        total = 0
+        data = request.get_json()
+        if not data or not data['product_id']:
+            return make_response(jsonify({
+                                         'Status': 'Failed',
+                                         'Message': "No data posted"
+                                         }), 400)
+        product_id = data['product_id']
+        if current_user and current_user['role'] == 'attendant':
+            self.prod_obj = PostProduct.get_all_products(self)
+            for product in self.prod_obj:
+                if int(product['quantity']) > 0:
+                    if product['product_id'] == product_id:
+                        attendant_id = current_user['user_id']
+                        post_sale = PostSale()
+                        post_sale.save_sale(attendant_id, product_id)
+                        product['quantity'] = product['quantity'] - 1
+                        productId = product_id
+                        update_prod = PostProduct()
+                        update_prod.update_product(product, productId)
+                        self.sale_obj = PostSale.get_all_sales(self)
+                        for sale in self.sale_obj:
+                            if product['product_id'] in sale.values():
+                                total = total + int(product['price'])
+                        return make_response(jsonify({
+                            'Status': 'Ok',
+                            'Message': "Success",
+                            'My Sales': product,
+                            "Total": total
+                        }), 201)
+                    else:
+                        return make_response(jsonify({
+                            'Status': 'Failed',
+                            'Message': "product does not exist"
+                        }), 404)
+                else:
+                    return make_response(jsonify({
+                                         'Status': 'Failed',
+                                         'Message': "No more products to sell"
+                                         }), 404)
+        else:
+            return make_response(jsonify({
+                                         'Status': 'Failed',
+                                         'Message': "You must be an attendant"
+                                         }), 403)
