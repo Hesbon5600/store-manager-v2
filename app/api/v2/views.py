@@ -186,3 +186,34 @@ class SingleProduct(Resource):
                     'Message': "Product updated Successfully",
                     'My Products': product
                 }), 201)
+
+    @token_required
+    def delete(current_user, self, productID):
+        self.product_Id = int(productID)
+        data = request.get_json()
+        if current_user and current_user['role'] != "admin":
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "You must be an admin"
+            }), 401)
+        if current_user and current_user['role'] == "admin":
+            self.prod_obj = PostProduct.get_all_products(self)
+            if len(self.prod_obj) > 0:
+                for product in self.prod_obj:
+                    if product['product_id'] == self.product_Id:
+                        product = PostProduct()
+                        product.delete_product(self.product_Id)
+                        return make_response(jsonify({
+                            'Status': 'Ok',
+                            'Message': "Product deleted Successfully"
+                        }), 200)
+                    return make_response(jsonify({
+                        'Status': 'Failed',
+                        'Message': "Product does nor exist",
+                        'Avilable products': self.prod_obj
+                    }), 404)
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "No avilable products"
+            }), 404)
+
