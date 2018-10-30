@@ -5,7 +5,6 @@ from instance.config import app_config
 import jwt
 from .models import *
 from .utils import *
-from .models import User, PostProduct
 from werkzeug.security import check_password_hash
 import datetime
 
@@ -24,7 +23,8 @@ def token_required(f):
                 'Message': 'Token is missing, You must login first'
             }), 401)
         try:
-            data = jwt.decode(token, app_config['development'].SECRET_KEY, algorithms=['HS256'])
+            data = jwt.decode(
+                token, app_config['development'].SECRET_KEY, algorithms=['HS256'])
 
             for user in users:
                 if user['username'] == data['username']:
@@ -115,6 +115,11 @@ class Product(Resource):
     @token_required
     def post(current_user, self):
         data = request.get_json()
+        if not data or "title" not in data or 'category' not in data or 'description' not in data or 'price' not in data or 'lower_inventory' not in data or 'quantity' not in data:
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "Chech your input"
+            }), 401)
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
                 'Status': 'Failed',
@@ -133,7 +138,7 @@ class Product(Resource):
                     'Status': 'Ok',
                     'Message': "Product created Successfully",
                     'My Products': product
-                }), 200)
+                }), 201)
 
 
 class SingleProduct(Resource):
@@ -155,9 +160,9 @@ class SingleProduct(Resource):
                 'Message': "No such product"
             }), 404)
         return make_response(jsonify({
-                'Status': 'Failed',
-                'Message': "You must be logged in first"
-            }), 401)
+            'Status': 'Failed',
+            'Message': "You must be logged in first"
+        }), 401)
 
     @token_required
     def put(current_user, self, productID):
@@ -178,6 +183,6 @@ class SingleProduct(Resource):
             for product in self.prod_obj:
                 return make_response(jsonify({
                     'Status': 'Ok',
-                    'Message': "Product created Successfully",
+                    'Message': "Product updated Successfully",
                     'My Products': product
                 }), 201)

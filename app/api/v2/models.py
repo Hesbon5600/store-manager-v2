@@ -56,7 +56,7 @@ class Dtb():
 
             """
                 CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
-                user_id int REFERENCES users(user_id) not null,
+                attendant_id int REFERENCES users(user_id) not null,
                 product_id int REFERENCES products(product_id) not null)
             """
         ]
@@ -101,7 +101,7 @@ class User(Dtb):
 
         cur.execute(
             "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
-            (self.username, self.email, self.password, self.role)
+            (self.username, self.email, self.password, self.role),
         )
         self.conn.commit()
         self.conn.close()
@@ -114,9 +114,8 @@ class User(Dtb):
         cur.execute("SELECT * FROM users")
         result = cur.fetchall()
         users = []
-        single_user = {}
-
         for user in result:
+            single_user = {}
             single_user['user_id'] = user[0]
             single_user["username"] = user[1]
             single_user["email"] = user[2]
@@ -159,20 +158,24 @@ class PostProduct():
         cur.execute("SELECT * FROM products")
         result = cur.fetchall()
         products = []
-        single_product = {}
 
         for product in result:
+            single_product = {}
             single_product['product_id'] = product[0]
             single_product["title"] = product[1]
             single_product["description"] = product[2]
-            single_product["quantity"] = product[3]
-            single_product['lower_inventory'] = product[4]
+            single_product['category'] = product[3]
+            single_product['price'] = product[4]
+            single_product["quantity"] = product[5]
+            single_product['lower_inventory'] = product[6]
             products.append(single_product)
 
         self.conn.close()
         return products
 
     def update_product(self, data, productId):
+        db = Dtb()
+        self.productId = productId
         self.title = data['title']
         self.category = data['category']
         self.description = data['description']
@@ -181,18 +184,71 @@ class PostProduct():
         self.lower_inventory = data['lower_inventory']
         self.poductID = productId
 
+        self.conn = db.connection()
+        db.create_tables()
+        cur = self.conn.cursor()
+
+        cur.execute(
+            """UPDATE products SET title = %s, category = %s,
+            price = %s, quantity = %s, lower_inventory = %s, description = %s
+            WHERE product_id = %s""", (self.title, self.category, self.price,
+                                       self.quantity, self.lower_inventory,
+                                       self.description, self.productId),
+        )
+
+        self.conn.commit()
+        self.conn.close()
+
+    def delete_product(self, productID):
+        self.product_id = productID
         db = Dtb()
         self.conn = db.connection()
         db.create_tables()
         cur = self.conn.cursor()
-        cur.execute("SELECT * FROM products WHERE title = %s ", (self.title,))
-        row = cur.fetchall()
-        if row:
-            return make_response(jsonify({"message": "Item with the title already exists"}), 400)
+
+        # delete a product
+        try:
+            cur.execute(
+                "DELETE FROM products WHERE product_id = %s",
+                (self.product_id, )
+            )
+        except Exception as e:
+            print(e)
+        self.conn.commit()
+        self.conn.close()
+
+
+class PostSale(Dtb):
+    def get_all_sales(self):
+        db = Dtb()
+        self.conn = db.connection()
+        db.create_tables()
+        cur = self.conn.cursor()
+        cur.execute("SELECT * FROM sales")
+        result = cur.fetchall()
+        sales = []
+
+        for product in result:
+            single_sale = {}
+            single_sale['sale_id'] = product[0]
+            single_sale["attendant_id"] = product[1]
+            sales.append(single_sale)
+
+        self.conn.close()
+        return sales
+
+    def save_sale(self, attendant_id, product_id):
+        self.attendant_id = attendant_id
+        self.product_id = product_id
+        db = Dtb()
+        db.create_tables()
+        self.conn = db.connection()
+
+        cur = self.conn.cursor()
+
         cur.execute(
-            "UPDATE products SET title = %s , description = %s, category = %s, price = %s, quantity = %s, lower_inventory = %s WHERE product_id = %s",
-            (self.title, self.description, self.category, self.price,
-             self.quantity, self.lower_inventory, self.poductID)
+            "INSERT INTO sales (attendant_id, product_id) VALUES (%s, %s)",
+            (self.attendant_id, self.product_id),
         )
         self.conn.commit()
         self.conn.close()
