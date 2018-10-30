@@ -62,7 +62,7 @@ class BaseTest(unittest.TestCase):
                                             data=self.admin_login_details,
                                             content_type='application/json')
         self.admin_token = json.loads(login_admin.data.decode())
-        # print(self.admin_token)
+
         # Signup attendant
         signup_attendant = self.test_client.post("/api/v2/auth/signup",
                                                  data=self.attendant_info,
@@ -88,7 +88,7 @@ class BaseTest(unittest.TestCase):
                                                      'content-type': 'application/json',
                                                      'x-access-token': self.attendant_token['token']
                                                  })
-        print(self.create_sale.data)
+
         self.context = self.app.app_context()
         self.context.push()
 
