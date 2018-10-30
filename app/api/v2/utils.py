@@ -76,7 +76,6 @@ class ValidateProduct():
 
     def validate_duplicates(self):
         self.prod_obj = PostProduct.get_all_products(self)
-        print("self.prod_obj")
         for product in self.prod_obj:
             if product['title'] == self.title:
                 message = "Product: '" + self.title + "' already exists"

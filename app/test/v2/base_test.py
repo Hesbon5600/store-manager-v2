@@ -40,19 +40,23 @@ class BaseTest(unittest.TestCase):
         })
         # Product details
         self.product = json.dumps({
-            "title": "Pangahgh Soap",
+            "title": "Panga Soap",
             "category": "toilateries",
             "description": "description for omo",
             "lower_inventory": 1,
             "price": 20.00,
             "quantity": 2
         })
+        # Sale detail
+        self.sale = json.dumps({
+            "product_id": 1
+        })
         # Signup admin
         self.signup_admin = self.test_client.post("/api/v2/auth/signup",
-                                                 data=self.admin_info,
-                                                 headers={
-                                                     'content-type': 'application/json'
-                                                 })
+                                                  data=self.admin_info,
+                                                  headers={
+                                                      'content-type': 'application/json'
+                                                  })
         # Login admin and get the token
         login_admin = self.test_client.post("/api/v2/auth/login",
                                             data=self.admin_login_details,
@@ -67,16 +71,24 @@ class BaseTest(unittest.TestCase):
                                                  })
 
         login_attendant = self.test_client.post("/api/v2/auth/login",
-                                            data=self.attendant_login_info,
-                                            content_type='application/json')
+                                                data=self.attendant_login_info,
+                                                content_type='application/json')
         self.attendant_token = json.loads(login_attendant.data.decode())
 
         self.test_client.post("/api/v2/products",
-                                         data=self.product,
-                                         headers={'x-access-token': self.admin_token['token'],
-                                             'content-type': 'application/json'
-                                           })
-
+                              data=self.product,
+                              headers={'x-access-token': self.admin_token['token'],
+                                       'content-type': 'application/json'
+                                       })
+        self.create_sale = self.test_client.post("/api/v2/sales",
+                                                 data=json.dumps({
+                                                     "product_id": 1
+                                                 }),
+                                                 headers={
+                                                     'content-type': 'application/json',
+                                                     'x-access-token': self.attendant_token['token']
+                                                 })
+        print(self.create_sale.data)
         self.context = self.app.app_context()
         self.context.push()
 

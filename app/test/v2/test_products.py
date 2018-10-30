@@ -18,7 +18,7 @@ class TestProducts(BaseTest):
                                              'content-type': 'application/json',
                                              'x-access-token': self.admin_token['token']})
         # print(response.data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 406)
 
     def test_attendant_create_product(self):
 
@@ -32,7 +32,7 @@ class TestProducts(BaseTest):
     def test_get_all_products(self):
         response = self.test_client.get('/api/v2/products', headers={
             'x-access-token': self.attendant_token['token']})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_all_products_no_token(self):
         response = self.test_client.get('/api/v2/products')
@@ -57,4 +57,9 @@ class TestProducts(BaseTest):
                                         data=product,
                                         headers={
                                             'x-access-token': self.admin_token['token']})
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_a_products(self):
+        response = self.test_client.delete('/api/v2/products/1', headers={
+        'x-access-token': self.admin_token['token']})
         self.assertEqual(response.status_code, 404)
