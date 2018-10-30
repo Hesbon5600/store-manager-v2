@@ -187,6 +187,11 @@ class PostProduct():
         self.conn = db.connection()
         db.create_tables()
         cur = self.conn.cursor()
+        cur.execute(
+            "SELECT * FROM products WHERE title = %s", (self.title,))
+        row = cur.fetchall()
+        if row:
+            return jsonify({"message": "the title '" + self.title + "' is already in use"}), 400
 
         cur.execute(
             """UPDATE products SET title = %s, category = %s,

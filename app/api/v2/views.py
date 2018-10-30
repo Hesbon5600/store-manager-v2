@@ -64,7 +64,7 @@ class UserLogin(Resource):
         username = data['username']
         password = data['password']
 
-        if not data or not username or not password:
+        if not data or not username or not password or 'username' not in data or 'password' not in data:
             return make_response(jsonify({
                                          'Status': 'Failed',
                                          'Message': "Login required"
@@ -224,6 +224,7 @@ class Sale(Resource):
     def post(current_user, self):
         total = 0
         data = request.get_json()
+        print(current_user)
         if not data or not data['product_id']:
             return make_response(jsonify({
                                          'Status': 'Failed',
@@ -290,3 +291,29 @@ class Sale(Resource):
             'Status': 'Failed',
             'Message': "You must be an admin"
         }), 403)
+
+
+class SingleSale(Resource):
+    @token_required
+    def get(current_user, self, saleID):
+        self.sale_obj = PostSale.get_all_sales(self)
+        for sale in self.sale_obj:
+            if current_user['user_id'] == sale['attendant_id'] or current_user['role'] == 'admin':
+                if int(saleID) == sale['sale_id']:
+                    response = make_response(jsonify({
+                        'Status': 'Ok',
+                        'Message': "Success",
+                        'Sale': sale
+                    }), 200)
+
+                else:
+                    response = make_response(jsonify({
+                        'Status': 'Failed',
+                        'Message': "No avilable sales"
+                    }), 404)
+                return response
+            else:
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "You cannor access this sale record"
+                }), 401)
