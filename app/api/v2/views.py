@@ -293,3 +293,27 @@ class Sale(Resource):
         }), 403)
 
 
+class SingleSale(Resource):
+    @token_required
+    def get(current_user, self, saleID):
+        self.sale_obj = PostSale.get_all_sales(self)
+        for sale in self.sale_obj:
+            if current_user['user_id'] == sale['attendant_id'] or current_user['role'] == 'admin':
+                if int(saleID) == sale['sale_id']:
+                    response = make_response(jsonify({
+                        'Status': 'Ok',
+                        'Message': "Success",
+                        'Sale': sale
+                    }), 200)
+
+                else:
+                    response = make_response(jsonify({
+                        'Status': 'Failed',
+                        'Message': "No avilable sales"
+                    }), 404)
+                return response
+            else:
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "You cannor access this sale record"
+                }), 401)
