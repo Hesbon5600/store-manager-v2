@@ -30,6 +30,9 @@ class ValidateUser(User):
         if self.role == "":
             message = "Role is missing"
             abort(400, message)
+        # if self.role != "admin" or self.role != 'attendant':
+        #     message = "Role must be 'admin' or 'attendant'"
+        #     abort(400, message)
         for user in self.user_obj:
             if self.username == user["username"]:
                 message = "Username '" + self.username + "' already taken"

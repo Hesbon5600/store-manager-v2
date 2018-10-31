@@ -46,26 +46,20 @@ class Dtb():
             role varchar(10) not null)
             """,
             """
-                CREATE TABLE IF NOT EXISTS products (
-                product_id serial PRIMARY KEY,
-                title varchar(30) not null,
-                description varchar(100) not null,
-                category varchar(30) not null,
-                price float(4) not null,
-                quantity int not null,
-                lower_inventory int not null)
+            CREATE TABLE IF NOT EXISTS products (
+            product_id serial PRIMARY KEY,
+            title varchar(30) not null,
+            description varchar(100) not null,
+            category varchar(30) not null,
+            price float(4) not null,
+            quantity int not null,
+            lower_inventory int not null)
             """,
             """
-                CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
-                attendant_id int REFERENCES users(user_id) not null,
-                product_id int REFERENCES products(product_id) not null)
+            CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
+            attendant_id int REFERENCES users(user_id) not null,
+            product_id int REFERENCES products(product_id) not null)
             """,
-            """
-                CREATE TABLE IF NOT EXISTS products_sales (
-                product_id int REFERENCES products(product_id) not null,
-                sale_id int REFERENCES sales(sale_id)not null,
-                quantity int not null)
-            """
         ]
         try:
             cur = self.connection().cursor()
@@ -100,11 +94,11 @@ class User(Dtb):
             self.email = data['email'].strip()
             self.role = data['role'].strip()
             db_obj = Dtb()
-            db_obj.create_tables()
 
             self.conn = db_obj.connection()
 
     def save_user(self):
+        db_obj = Dtb()
         cur = self.conn.cursor()
 
         cur.execute(
@@ -117,7 +111,6 @@ class User(Dtb):
     def get_all_users(self):
         db_obj = Dtb()
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM users")
         result = cur.fetchall()
@@ -139,7 +132,6 @@ class User(Dtb):
         self.role = 'admin'
         self.user_id = user_id
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
         cur.execute(
             """UPDATE users SET role = %s WHERE user_id = %s""",
@@ -160,7 +152,6 @@ class PostProduct():
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
         db_obj = Dtb()
-        db_obj.create_tables()
         self.conn = db_obj.connection()
 
         cur = self.conn.cursor()
@@ -176,7 +167,6 @@ class PostProduct():
     def get_all_products(self):
         db_obj = Dtb()
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM products")
         result = cur.fetchall()
@@ -208,7 +198,6 @@ class PostProduct():
         self.product_id = product_id
 
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
         cur.execute(
             "SELECT * FROM products WHERE title = %s", (self.title,))
@@ -240,7 +229,6 @@ class PostProduct():
         self.product_id = product_id
 
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
         cur.execute(
             """UPDATE products SET title = %s, category = %s,
@@ -276,17 +264,26 @@ class PostSale(Dtb):
     def get_all_sales(self):
         db_obj = Dtb()
         self.conn = db_obj.connection()
-        db_obj.create_tables()
         cur = self.conn.cursor()
-        cur.execute("SELECT * FROM sales")
+        cur.execute("SELECT products.product_id, products.title,\
+        products.description, products.category, products.price,\
+        users.user_id, users.username, sales.sale_id FROM products JOIN sales ON\
+        products.product_id=sales.product_id JOIN users ON\
+        users.user_id=sales.attendant_id")
+        # cur.execute("SELECT * FROM sales")
         result = cur.fetchall()
         sales = []
 
-        for product in result:
+        for sale in result:
             single_sale = {}
-            single_sale['sale_id'] = product[0]
-            single_sale["attendant_id"] = product[1]
-            single_sale['product_id'] = product[2]
+            single_sale['product_id'] = sale[0]
+            single_sale['product_title'] = sale[1]
+            single_sale['product_description'] = sale[2],
+            single_sale['product_category'] = sale[3]
+            single_sale["product_price"] = sale[4]
+            single_sale['attendant_id'] = sale[5]
+            single_sale['attendant_name'] = sale[6]
+            single_sale['sale_id'] = sale[7]
             sales.append(single_sale)
 
         self.conn.close()
@@ -309,10 +306,5 @@ class PostSale(Dtb):
         cur.execute(
             "SELECT * FROM sales WHERE product_id = %s", (self.product_id,))
         row = cur.fetchall()
-        # if row:
-        #     cur.execute(
-        #         "INSERT INTO product_sales (sale_id, product_id, product_quantity) VALUES (%s, %s)",
-        #         (self.attendant_id, self.product_id, self.product_quantity),
-        #     )
         self.conn.commit()
         self.conn.close()

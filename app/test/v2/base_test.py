@@ -10,7 +10,7 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         # Create a database object
         self.db_object = Dtb()
-        # self.db_object.destroy_tables()
+        self.db_object.destroy_tables()
         self.db_object.create_tables()
         self.app = create_app(config_name="testing")
         # Creates a test client for this application.
