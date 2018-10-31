@@ -14,6 +14,10 @@ class TestUser(BaseTest):
                                          headers={
                                              'content-type': 'application/json'
                                          })
+        # print(response.json)
+        self.assertEqual(response.json[
+                         'Message'], "User 'heSbon52' successfully registered as 'admin")
+
         self.assertEqual(response.status_code, 201)
 
     def test_attendant__signup(self):
@@ -30,7 +34,8 @@ class TestUser(BaseTest):
                                              'content-type': 'application/json'
                                          })
         self.assertEqual(response.status_code, 201)
-
+        self.assertEqual(response.json[
+                         'Message'], "User 'hesbon2' successfully registered as 'attendant")
     def test_existing_username(self):
         user = json.dumps({
             "username": "hesbon",
@@ -84,16 +89,6 @@ class TestUser(BaseTest):
                          'message'], "Role is missing")
         self.assertEqual(response.status_code, 400)
 
-    def test_invalid_role(self):
-        user = json.dumps({
-            "username": "",
-            "email": "hesbon2@gmail.com",
-                        "password": "slGG23@bha",
-                        "role": "mister"})
-        response = self.test_client.post("/api/v2/auth/signup", data=user,
-                                         headers={
-                                             'content-type': 'application/json'})
-        self.assertEqual(response.status_code, 400)
 
     def test_username_not_string(self):
         user = json.dumps({
@@ -224,3 +219,5 @@ class TestUser(BaseTest):
                                          })
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json[
+                         'Message'], "Successfully logged in as 'attendant")

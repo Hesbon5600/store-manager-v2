@@ -77,9 +77,9 @@ class UserLogin(Resource):
                                     'exp': datetime.datetime.utcnow() +
                                     datetime.timedelta(minutes=3000)},
                                    app_config['development'].SECRET_KEY, algorithm='HS256')
-                return make_response(jsonify({
-                                             'token': token.decode('UTF-8')
-                                             }), 200)
+                return make_response(jsonify({'Message': "Successfully logged in as '" + user['role'],
+                                              'token': token.decode('UTF-8')
+                                              }), 200)
 
         return make_response(jsonify({
             'Status': 'Failed',
@@ -92,24 +92,23 @@ class Product(Resource):
     @token_required
     def get(current_user, self):
         self.prod_obj = PostProduct.get_all_products(self)
-
-        if current_user:
-            if len(self.prod_obj) < 1:
-                response = make_response(jsonify({
-                    'Status': 'Failed',
-                    'Message': "No avilable products"
-                }), 404)
-            else:
-                response = make_response(jsonify({
-                    'Status': 'Ok',
-                    'Message': "Success",
-                    'My products': self.prod_obj
-                }), 200)
-        else:
+        if not current_user:
             response = make_response(jsonify({
                 'Status': 'Failed',
                 'Message': "You must first login"
             }), 401)
+        if len(self.prod_obj) < 1:
+            response = make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "No avilable products"
+            }), 404)
+        else:
+            response = make_response(jsonify({
+                'Status': 'Ok',
+                'Message': "Successfully fetched all products",
+                'My products': self.prod_obj
+            }), 200)
+
         return response
 
     @token_required
@@ -134,11 +133,12 @@ class Product(Resource):
 
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
-                return make_response(jsonify({
-                    'Status': 'Ok',
-                    'Message': "Product created Successfully",
-                    'My Products': product
-                }), 201)
+                if product['title'] == data['title']:
+                    return make_response(jsonify({
+                        'Status': 'Ok',
+                        'Message': "Product created Successfully",
+                        'My Products': product
+                    }), 201)
 
 
 class SingleProduct(Resource):
@@ -151,7 +151,7 @@ class SingleProduct(Resource):
                 if product['product_id'] == int(productID):
                     return make_response(jsonify({
                         'Status': 'Ok',
-                        'Message': "Success",
+                        'Message': "Successfully fetched one product",
                         'My product': product
                     }), 200)
 
@@ -207,11 +207,11 @@ class SingleProduct(Resource):
                             'Status': 'Ok',
                             'Message': "Product deleted Successfully"
                         }), 200)
-                    return make_response(jsonify({
-                        'Status': 'Failed',
-                        'Message': "Product does nor exist",
-                        'Avilable products': self.prod_obj
-                    }), 404)
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "Product does nor exist",
+                    'Avilable products': self.prod_obj
+                }), 404)
             return make_response(jsonify({
                 'Status': 'Failed',
                 'Message': "No avilable products"
@@ -225,49 +225,55 @@ class Sale(Resource):
         total = 0
         data = request.get_json()
         print(current_user)
-        if not data or not data['product_id']:
-            return make_response(jsonify({
-                                         'Status': 'Failed',
-                                         'Message': "No data posted"
-                                         }), 400)
-        product_id = data['product_id']
-        if current_user and current_user['role'] == 'attendant':
-            self.prod_obj = PostProduct.get_all_products(self)
-            for product in self.prod_obj:
-                if int(product['quantity']) > 0:
-                    if product['product_id'] == product_id:
-                        attendant_id = current_user['user_id']
-                        post_sale = PostSale()
-                        post_sale.save_sale(attendant_id, product_id)
-                        product['quantity'] = product['quantity'] - 1
-                        productId = product_id
-                        update_prod = PostProduct()
-                        update_prod.update_product(product, productId)
-                        self.sale_obj = PostSale.get_all_sales(self)
-                        for sale in self.sale_obj:
-                            if product['product_id'] in sale.values():
-                                total = total + int(product['price'])
-                        return make_response(jsonify({
-                            'Status': 'Ok',
-                            'Message': "Success",
-                            'My Sales': product,
-                            "Total": total
-                        }), 201)
-                    else:
-                        return make_response(jsonify({
-                            'Status': 'Failed',
-                            'Message': "product does not exist"
-                        }), 404)
-                else:
-                    return make_response(jsonify({
-                                         'Status': 'Failed',
-                                         'Message': "No more products to sell"
-                                         }), 404)
-        else:
+        if current_user and current_user['role'] != 'attendant':
             return make_response(jsonify({
                                          'Status': 'Failed',
                                          'Message': "You must be an attendant"
                                          }), 403)
+        if not data or not data['product_title']:
+            return make_response(jsonify({
+                                         'Status': 'Failed',
+                                         'Message': "No data posted"
+                                         }), 400)
+        product_title = data['product_title']
+        product_quantity = data['product_quantity']
+        # product_quantity
+        self.prod_obj = PostProduct.get_all_products(self)
+        for product in self.prod_obj:
+            if product['title'] == data['product_title'] and int(product['quantity']) < 1:
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "No more products to sell"
+                }), 404)
+
+            if product['title'] == product_title:
+                if product['quantity'] < product_quantity:
+                    return make_response(jsonify({
+                        'Status': 'Failed',
+                        'Message': "You are attempting to sale more products than avilable"
+                    }), 403)
+                attendant_id = current_user['user_id']
+                product_id = product['product_id']
+                post_sale = PostSale()
+                post_sale.save_sale(attendant_id, product_id)
+                product['quantity'] = product['quantity'] - product_quantity
+                productId = product_id
+                update_prod = PostProduct()
+                update_prod.update_sold_product(product, productId)
+                self.sale_obj = PostSale.get_all_sales(self)
+                for sale in self.sale_obj:
+                    if product['product_id'] in sale.values():
+                        total = total + int(product['price'])
+                return make_response(jsonify({
+                    'Status': 'Ok',
+                    'Message': "Success",
+                    'My Sales': product,
+                    "Total": total
+                }), 201)
+        return make_response(jsonify({
+            'Status': 'Failed',
+            'Message': "product does not exist"
+        }), 404)
 
     # Get all sale entries
     @token_required

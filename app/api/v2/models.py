@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 import psycopg2
-from flask import jsonify, make_response
+from flask import abort
 from instance.config import Config
 from werkzeug.security import generate_password_hash
 
@@ -53,7 +53,12 @@ class Dtb():
                 quantity int not null,
                 lower_inventory int not null)
             """,
-
+            # """
+            #     CREATE TABLE IF NOT EXISTS products_sales (
+            #     product_id int not null,
+            #     sale_id int not null,
+            #     quantity int not null)
+            # """,
             """
                 CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
                 attendant_id int REFERENCES users(user_id) not null,
@@ -74,6 +79,7 @@ class Dtb():
 
         sql = [
             "DROP TABLE IF EXISTS users CASCADE",
+            # "DROP TABLE IF EXISTS products-sales CASCADE",
             "DROP TABLE IF EXISTS products CASCADE",
             "DROP TABLE IF EXISTS sales CASCADE"
         ]
@@ -191,7 +197,8 @@ class PostProduct():
             "SELECT * FROM products WHERE title = %s", (self.title,))
         row = cur.fetchall()
         if row:
-            return jsonify({"message": "the title '" + self.title + "' is already in use"}), 400
+            message = "the title '" + self.title + "' is already in use"
+            abort(406, message)
 
         cur.execute(
             """UPDATE products SET title = %s, category = %s,
@@ -203,6 +210,32 @@ class PostProduct():
 
         self.conn.commit()
         self.conn.close()
+
+    def update_sold_product(self, data, productId):
+        db = Dtb()
+        self.productId = productId
+        self.title = data['title']
+        self.category = data['category']
+        self.description = data['description']
+        self.quantity = data['quantity']
+        self.price = data['price']
+        self.lower_inventory = data['lower_inventory']
+        self.poductID = productId
+
+        self.conn = db.connection()
+        db.create_tables()
+        cur = self.conn.cursor()
+        cur.execute(
+            """UPDATE products SET title = %s, category = %s,
+            price = %s, quantity = %s, lower_inventory = %s, description = %s
+            WHERE product_id = %s""", (self.title, self.category, self.price,
+                                       self.quantity, self.lower_inventory,
+                                       self.description, self.productId),
+        )
+
+        self.conn.commit()
+        self.conn.close()
+
 
     def delete_product(self, productID):
         self.product_id = productID
@@ -246,6 +279,7 @@ class PostSale(Dtb):
     def save_sale(self, attendant_id, product_id):
         self.attendant_id = attendant_id
         self.product_id = product_id
+        # self.product_quantity = product_quantity
         db = Dtb()
         db.create_tables()
         self.conn = db.connection()
@@ -256,5 +290,13 @@ class PostSale(Dtb):
             "INSERT INTO sales (attendant_id, product_id) VALUES (%s, %s)",
             (self.attendant_id, self.product_id),
         )
+        cur.execute(
+            "SELECT * FROM sales WHERE product_id = %s", (self.product_id,))
+        row = cur.fetchall()
+        # if row:
+        #     cur.execute(
+        #         "INSERT INTO product_sales (sale_id, product_id, product_quantity) VALUES (%s, %s)",
+        #         (self.attendant_id, self.product_id, self.product_quantity),
+        #     )
         self.conn.commit()
         self.conn.close()

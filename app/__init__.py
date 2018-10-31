@@ -4,6 +4,7 @@ from .api.v2 import v2 as version2
 
 
 def create_app(config_name="development"):
+    ''' Configure the app and registre blueprints '''
     app = Flask("__name__", instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
