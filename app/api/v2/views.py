@@ -1,8 +1,10 @@
 from functools import wraps
+import jwt
 from flask import Flask, jsonify, make_response, request
 from flask_restful import Resource, Api
+from flask_expects_json import expects_json
 from instance.config import app_config
-import jwt
+from .expected_json import *
 from .models import *
 from .utils import *
 from werkzeug.security import check_password_hash
@@ -38,6 +40,7 @@ def token_required(f):
 
 
 class UserRegistration(Resource):
+    @expects_json(USER_REGISTRATION_JSON)
     def post(self):
         data = request.get_json()
         if not data:
@@ -58,11 +61,12 @@ class UserRegistration(Resource):
 
 
 class UserLogin(Resource):
+    @expects_json(USER_LOGIN_JSON)
     def post(self):
         self.user_obj = User.get_all_users(self)
         data = request.get_json()
-        username = data['username']
-        password = data['password']
+        username = data['username'].strip()
+        password = data['password'].strip()
 
         if not data or not username or not password or 'username' not in data or 'password' not in data:
             return make_response(jsonify({
@@ -85,6 +89,37 @@ class UserLogin(Resource):
             'Status': 'Failed',
             'Message': "No such user found. Check your login credentials"
         }), 404)
+
+
+class PromoteUser(Resource):
+    @token_required
+    def put(current_user, self, user_id):
+        self.user_id = int(user_id)
+        self.user_obj = User.get_all_users(self)
+        # data = request.get_json()
+        if current_user and current_user['role'] != "admin":
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "You must be an admin"
+            }), 401)
+        for user in self.user_obj:
+            if int(user['user_id']) != int(self.user_id):
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "No such user"
+                }), 400)
+                # print(user)
+            if user['role'] == 'admin':
+                return make_response(jsonify({
+                    'Status': 'Failed',
+                    'Message': "User '" + user['username'] + "' is already an admin"
+                }), 400)
+            update_user = User()
+            update_user.update_user(self.user_id)
+            return make_response(jsonify({
+                'Status': 'Ok',
+                'Message': "User '" + user['username'] + "' has been promoted to admin"
+            }), 200)
 
 
 class Product(Resource):
@@ -112,6 +147,7 @@ class Product(Resource):
         return response
 
     @token_required
+    @expects_json(PRODUCT_JSON)
     def post(current_user, self):
         data = request.get_json()
         if not data or "title" not in data or 'category' not in data or 'description' not in data or 'price' not in data or 'lower_inventory' not in data or 'quantity' not in data:
@@ -146,25 +182,26 @@ class SingleProduct(Resource):
     @token_required
     def get(current_user, self, productID):
         self.prod_obj = PostProduct.get_all_products(self)
-        if current_user:
-            for product in self.prod_obj:
-                if product['product_id'] == int(productID):
-                    return make_response(jsonify({
-                        'Status': 'Ok',
-                        'Message': "Successfully fetched one product",
-                        'My product': product
-                    }), 200)
-
+        if not current_user:
             return make_response(jsonify({
                 'Status': 'Failed',
-                'Message': "No such product"
-            }), 404)
+                'Message': "You must be logged in first"
+            }), 401)
+        for product in self.prod_obj:
+            if product['product_id'] == int(productID):
+                return make_response(jsonify({
+                    'Status': 'Ok',
+                    'Message': "Successfully fetched one product",
+                    'My product': product
+                }), 200)
+
         return make_response(jsonify({
             'Status': 'Failed',
-            'Message': "You must be logged in first"
-        }), 401)
+            'Message': "No such product"
+        }), 404)
 
     @token_required
+    @expects_json(PRODUCT_JSON)
     def put(current_user, self, productID):
         self.product_Id = int(productID)
         data = request.get_json()
@@ -176,11 +213,15 @@ class SingleProduct(Resource):
         if current_user and current_user['role'] == "admin":
             valid_product = ValidateProduct(data)
             valid_product.validate_product_details()
-            product = PostProduct()
-            product.update_product(data, self.product_Id)
-
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
+                if product['product_id'] != productID:
+                    return make_response(jsonify({
+                        'Status': 'Failed',
+                        'Message': "No such product"
+                    }), 404)
+                product = PostProduct()
+                product.update_product(data, self.product_Id)
                 return make_response(jsonify({
                     'Status': 'Ok',
                     'Message': "Product updated Successfully",
@@ -221,10 +262,10 @@ class SingleProduct(Resource):
 class Sale(Resource):
     # Make a sales
     @token_required
+    @expects_json(SALE_JSON)
     def post(current_user, self):
         total = 0
         data = request.get_json()
-        print(current_user)
         if current_user and current_user['role'] != 'attendant':
             return make_response(jsonify({
                                          'Status': 'Failed',
@@ -262,9 +303,9 @@ class Sale(Resource):
                 }
                 post_sale.save_sale(new_sale)
                 product['quantity'] = product['quantity'] - product_quantity
-                productId = product_id
+                product_id = product_id
                 update_prod = PostProduct()
-                update_prod.update_sold_product(product, productId)
+                update_prod.update_sold_product(product, product_id)
                 self.sale_obj = PostSale.get_all_sales(self)
                 for sale in self.sale_obj:
                     if product['product_id'] in sale.values():
@@ -283,25 +324,26 @@ class Sale(Resource):
     # Get all sale entries
     @token_required
     def get(current_user, self):
-        if current_user and current_user['role'] == "admin":
-            self.sale_obj = PostSale.get_all_sales(self)
-            if len(self.sale_obj) > 0:
-                response = make_response(jsonify({
-                    'Status': 'Ok',
-                    'Message': "Success",
-                    'My Sales': self.sale_obj
-                }), 200)
-            else:
-                response = make_response(jsonify({
-                    'Status': 'Failed',
-                    'Message': "No sales made"
-                }), 404)
-            return response
-
-        return make_response(jsonify({
+        if current_user and current_user['role'] != "admin":
+            return make_response(jsonify({
             'Status': 'Failed',
             'Message': "You must be logged in as an admin"
         }), 403)
+        self.sale_obj = PostSale.get_all_sales(self)
+        if len(self.sale_obj) > 0:
+            response = make_response(jsonify({
+                'Status': 'Ok',
+                'Message': "Success",
+                'My Sales': self.sale_obj
+            }), 200)
+        else:
+            response = make_response(jsonify({
+                'Status': 'Failed',
+                'Message': "No sales made"
+            }), 404)
+        return response
+
+        
 
 
 class SingleSale(Resource):
