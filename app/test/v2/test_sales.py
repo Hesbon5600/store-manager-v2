@@ -5,23 +5,38 @@ class TestSales(BaseTest):
 
     def test_post_sale_admin(self):
         response = self.test_client.post("/api/v2/sales",
-                                         data=json.dumps({"product_id": 1}),
+                                         data=json.dumps({"product_title": "omoo",
+                                                          "product_quantity": 1}),
                                          headers={
                                              'content-type': 'application/json',
                                              'x-access-token': self.admin_token['token']})
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json[
-                         'Message'], "Product deleted Successfully")
+                         'Message'], "You must be an attendant")
+
+    def test_post_sale_attendant(self):
+        response = self.test_client.post("/api/v2/sales",
+                                         data=json.dumps({"product_title": "omoo",
+                                                          "product_quantity": 1}),
+                                         headers={
+                                             'content-type': 'application/json',
+                                             'x-access-token': self.attendant_token['token']})
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json[
+                         'Message'], "Sale made successfully")
 
     def test_product_out_of_stock(self):
         self.test_client.post("/api/v2/sales",
-                              data=json.dumps({"product_id": 1}),
+                              data=json.dumps({"product_title": "omoo",
+                                               "product_quantity": 1}),
                               headers={
                                   'content-type': 'application/json',
                                   'x-access-token': self.attendant_token['token']})
         response = self.test_client.post("/api/v1/sales",
-                                         data=json.dumps({"product_id": 1}),
+                                         data=json.dumps({"product_title": "omoo",
+                                                          "product_quantity": 1}),
                                          headers={
                                              'content-type': 'application/json',
                                              'x-access-token': self.attendant_token['token']})
@@ -30,7 +45,8 @@ class TestSales(BaseTest):
 
     def test_post_sale_non_existent_product(self):
         response = self.test_client.post("/api/v2/sales",
-                                         data=json.dumps({"product_id": 2}),
+                                         data=json.dumps({"product_title": "salt",
+                                                          "product_quantity": 1}),
                                          headers={
                                              'content-type': 'application/json',
                                              'x-access-token': self.attendant_token['token']})

@@ -53,16 +53,16 @@ class Dtb():
                 quantity int not null,
                 lower_inventory int not null)
             """,
-            # """
-            #     CREATE TABLE IF NOT EXISTS products_sales (
-            #     product_id int not null,
-            #     sale_id int not null,
-            #     quantity int not null)
-            # """,
             """
                 CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
                 attendant_id int REFERENCES users(user_id) not null,
                 product_id int REFERENCES products(product_id) not null)
+            """,
+            """
+                CREATE TABLE IF NOT EXISTS products_sales (
+                product_id int REFERENCES products(product_id) not null,
+                sale_id int REFERENCES sales(sale_id)not null,
+                quantity int not null)
             """
         ]
         try:
@@ -79,7 +79,7 @@ class Dtb():
 
         sql = [
             "DROP TABLE IF EXISTS users CASCADE",
-            # "DROP TABLE IF EXISTS products-sales CASCADE",
+            "DROP TABLE IF EXISTS products_sales CASCADE",
             "DROP TABLE IF EXISTS products CASCADE",
             "DROP TABLE IF EXISTS sales CASCADE"
         ]
@@ -236,7 +236,6 @@ class PostProduct():
         self.conn.commit()
         self.conn.close()
 
-
     def delete_product(self, productID):
         self.product_id = productID
         db = Dtb()
@@ -276,10 +275,10 @@ class PostSale(Dtb):
         self.conn.close()
         return sales
 
-    def save_sale(self, attendant_id, product_id):
-        self.attendant_id = attendant_id
-        self.product_id = product_id
-        # self.product_quantity = product_quantity
+    def save_sale(self, new_sale):
+        self.attendant_id = new_sale['attendant_id']
+        self.product_id = new_sale['product_id']
+        self.product_quantity = new_sale['product_quantity']
         db = Dtb()
         db.create_tables()
         self.conn = db.connection()

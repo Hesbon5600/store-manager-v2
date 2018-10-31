@@ -255,7 +255,12 @@ class Sale(Resource):
                 attendant_id = current_user['user_id']
                 product_id = product['product_id']
                 post_sale = PostSale()
-                post_sale.save_sale(attendant_id, product_id)
+                new_sale = {
+                    "attendant_id": attendant_id,
+                    "product_id": product_id,
+                    "product_quantity": product_quantity
+                }
+                post_sale.save_sale(new_sale)
                 product['quantity'] = product['quantity'] - product_quantity
                 productId = product_id
                 update_prod = PostProduct()
@@ -266,7 +271,7 @@ class Sale(Resource):
                         total = total + int(product['price'])
                 return make_response(jsonify({
                     'Status': 'Ok',
-                    'Message': "Success",
+                    'Message': "Sale made successfully",
                     'My Sales': product,
                     "Total": total
                 }), 201)
@@ -278,7 +283,7 @@ class Sale(Resource):
     # Get all sale entries
     @token_required
     def get(current_user, self):
-        if current_user['role'] == "admin":
+        if current_user and current_user['role'] == "admin":
             self.sale_obj = PostSale.get_all_sales(self)
             if len(self.sale_obj) > 0:
                 response = make_response(jsonify({
@@ -295,7 +300,7 @@ class Sale(Resource):
 
         return make_response(jsonify({
             'Status': 'Failed',
-            'Message': "You must be an admin"
+            'Message': "You must be logged in as an admin"
         }), 403)
 
 

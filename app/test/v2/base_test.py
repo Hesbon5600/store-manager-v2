@@ -41,16 +41,17 @@ class BaseTest(unittest.TestCase):
         })
         # Product details
         self.product = json.dumps({
-            "title": "PangasjdgfjdsfSoap",
+            "title": "omoo",
             "category": "toilateries",
             "description": "description for omo",
             "lower_inventory": 1,
             "price": 20.00,
-            "quantity": 2
+            "quantity": 3
         })
         # Sale detail
         self.sale = json.dumps({
-            "product_id": 1
+            "product_title": "omoo",
+            "product_quantity": 1
         })
         # Signup admin
         self.signup_admin = self.test_client.post(
@@ -88,9 +89,7 @@ class BaseTest(unittest.TestCase):
                               })
         self.create_sale = self.test_client.post(
             "/api/v2/sales",
-            data=json.dumps({
-                "product_id": 1
-            }),
+            data=self.sale,
             headers={
                 'content-type': 'application/json',
                 'x-access-token': self.attendant_token['token']
