@@ -180,7 +180,7 @@ class Product(Resource):
 class SingleProduct(Resource):
     # Get a single product
     @token_required
-    def get(current_user, self, productID):
+    def get(current_user, self, product_id):
         self.prod_obj = PostProduct.get_all_products(self)
         if not current_user:
             return make_response(jsonify({
@@ -188,7 +188,7 @@ class SingleProduct(Resource):
                 'Message': "You must be logged in first"
             }), 401)
         for product in self.prod_obj:
-            if product['product_id'] == int(productID):
+            if product['product_id'] == int(product_id):
                 return make_response(jsonify({
                     'Status': 'Ok',
                     'Message': "Successfully fetched one product",
@@ -202,8 +202,8 @@ class SingleProduct(Resource):
 
     @token_required
     @expects_json(PRODUCT_JSON)
-    def put(current_user, self, productID):
-        self.product_Id = int(productID)
+    def put(current_user, self, product_id):
+        self.product_Id = int(product_id)
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
@@ -215,7 +215,7 @@ class SingleProduct(Resource):
             valid_product.validate_product_details()
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
-                if product['product_id'] != productID:
+                if product['product_id'] != product_id:
                     return make_response(jsonify({
                         'Status': 'Failed',
                         'Message': "No such product"
@@ -229,8 +229,8 @@ class SingleProduct(Resource):
                 }), 201)
 
     @token_required
-    def delete(current_user, self, productID):
-        self.product_Id = int(productID)
+    def delete(current_user, self, product_id):
+        self.product_Id = int(product_id)
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
@@ -348,11 +348,11 @@ class Sale(Resource):
 
 class SingleSale(Resource):
     @token_required
-    def get(current_user, self, saleID):
+    def get(current_user, self, sale_id):
         self.sale_obj = PostSale.get_all_sales(self)
         for sale in self.sale_obj:
             if current_user['user_id'] == sale['attendant_id'] or current_user['role'] == 'admin':
-                if int(saleID) == sale['sale_id']:
+                if int(sale_id) == sale['sale_id']:
                     response = make_response(jsonify({
                         'Status': 'Ok',
                         'Message': "Success",

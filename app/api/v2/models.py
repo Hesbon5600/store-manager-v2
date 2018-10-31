@@ -205,7 +205,7 @@ class PostProduct():
         self.quantity = data['quantity']
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
-        self.poductID = product_id
+        self.product_id = product_id
 
         self.conn = db_obj.connection()
         db_obj.create_tables()
@@ -237,7 +237,7 @@ class PostProduct():
         self.quantity = data['quantity']
         self.price = data['price']
         self.lower_inventory = data['lower_inventory']
-        self.poductID = product_id
+        self.product_id = product_id
 
         self.conn = db_obj.connection()
         db_obj.create_tables()
@@ -253,8 +253,8 @@ class PostProduct():
         self.conn.commit()
         self.conn.close()
 
-    def delete_product(self, productID):
-        self.product_id = productID
+    def delete_product(self, product_id):
+        self.product_id = product_id
         db_obj = Dtb()
         self.conn = db_obj.connection()
         db_obj.create_tables()
