@@ -313,13 +313,13 @@ class Sale(Resource):
                     }), 403)
                 attendant_id = current_user['user_id']
                 product_id = product['product_id']
-                post_sale = PostSale()
                 new_sale = {
                     "attendant_id": attendant_id,
                     "product_id": product_id,
                     "product_quantity": product_quantity
                 }
-                post_sale.save_sale(new_sale)
+                post_sale = PostSale(new_sale)
+                post_sale.save_sale()
                 product['quantity'] = product['quantity'] - product_quantity
                 product_id = product_id
                 update_prod = PostProduct()
