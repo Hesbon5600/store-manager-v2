@@ -13,7 +13,7 @@ before_script:
    - export DB_NAME="test_dtb"
    - psql -c 'create database test_dtb;' -U postgres
 script:
- - pytest app/test/v2/
+ - pytest --cov=app -v app/test/v2/
 after_success:
  - coveralls
   

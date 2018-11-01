@@ -1,11 +1,12 @@
+'''Run the application'''
 from flask import jsonify, make_response
 from app import create_app
 from app.api.v2.models import Dtb
 
 app = create_app('development')
 
-db_obj = Dtb()
-db_obj.create_tables()
+DBOBJ = Dtb()
+DBOBJ.create_tables()
 
 
 @app.route('/')

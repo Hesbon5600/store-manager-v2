@@ -1,4 +1,4 @@
-''''''
+'''All database operations are handled here'''
 import os
 from datetime import datetime
 import psycopg2
@@ -8,7 +8,9 @@ from instance.config import Config
 
 
 class Dtb():
+    '''Create connection to the database'''
     def __init__(self):
+        '''Get the connection variables'''
         self.db_name = Config.DB_NAME
         self.db_host = Config.DB_HOST
         self.db_user = Config.DB_USER
@@ -16,6 +18,7 @@ class Dtb():
         self.conn = None
 
     def connection(self):
+        '''Create a connection'''
         try:
             if os.getenv("APP_SETTINGS") == "testing":
                 self.conn = psycopg2.connect(database="test_dtb",
@@ -30,12 +33,15 @@ class Dtb():
                     user=self.db_user,
                     host=self.db_host
                 )
+            self.conn = psycopg2.connect(
+                os.environ['DATABASE_URL'], sslmode='require')
 
         except Exception as exception:
             print(exception)
         return self.conn
 
     def create_tables(self):
+        '''Create tables in the database'''
         tables = [
 
             """
@@ -72,6 +78,7 @@ class Dtb():
         self.conn.close()
 
     def destroy_tables(self):
+        '''Called in the tearDown to destroy the tables'''
         cur = self.connection().cursor()
 
         sql = [
@@ -87,7 +94,9 @@ class Dtb():
 
 
 class User(Dtb):
+    '''Save, get and update users'''
     def __init__(self, data=None):
+        '''Get the user  data'''
         if data:
             self.username = data['username'].strip()
             self.password = generate_password_hash(data['password'].strip())
@@ -98,6 +107,7 @@ class User(Dtb):
             self.conn = db_obj.connection()
 
     def save_user(self):
+        '''Save the users information in the database'''
         db_obj = Dtb()
         cur = self.conn.cursor()
 
@@ -110,6 +120,7 @@ class User(Dtb):
         self.conn.close()
 
     def get_all_users(self):
+        '''Retrieve all users'''
         db_obj = Dtb()
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
@@ -129,6 +140,7 @@ class User(Dtb):
         return users
 
     def update_user(self, user_id):
+        '''Update user role to admin'''
         db_obj = Dtb()
         self.role = 'admin'
         self.user_id = user_id
@@ -144,8 +156,9 @@ class User(Dtb):
 
 
 class PostProduct():
-
+    '''Save, get, and update products'''
     def __init__(self, data=None):
+        '''Get the product data'''
         if data:
             self.title = data['title']
             self.category = data['category']
@@ -155,6 +168,7 @@ class PostProduct():
             self.lower_inventory = data['lower_inventory']
 
     def save_product(self):
+        '''Insert the product data in the database'''
         db_obj = Dtb()
         self.conn = db_obj.connection()
 
@@ -170,6 +184,7 @@ class PostProduct():
         self.conn.close()
 
     def get_all_products(self):
+        '''Get all the products from DB'''
         db_obj = Dtb()
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
@@ -192,6 +207,7 @@ class PostProduct():
         return products
 
     def update_product(self, product_id):
+        '''Update a product'''
         db_obj = Dtb()
         self.product_id = product_id
 
@@ -216,6 +232,7 @@ class PostProduct():
         self.conn.close()
 
     def update_sold_product(self, data, product_id):
+        '''Update sold product'''
         db_obj = Dtb()
         self.product_id = product_id
         self.title = data['title']
@@ -240,6 +257,7 @@ class PostProduct():
         self.conn.close()
 
     def delete_product(self, product_id):
+        '''Delete a product from the database'''
         self.product_id = product_id
         db_obj = Dtb()
         self.conn = db_obj.connection()
@@ -259,7 +277,16 @@ class PostProduct():
 
 
 class PostSale(Dtb):
+    '''Post, and get sales from the database'''
+    def __init__(self, new_sale=None):
+        '''Get the values from user input'''
+        if new_sale:
+            self.attendant_id = new_sale['attendant_id']
+            self.product_id = new_sale['product_id']
+            self.product_quantity = new_sale['product_quantity']
+
     def get_all_sales(self):
+        '''Get sales from the database'''
         db_obj = Dtb()
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
@@ -277,7 +304,7 @@ class PostSale(Dtb):
             single_sale = {}
             single_sale['product_id'] = sale[0]
             single_sale['product_title'] = sale[1]
-            single_sale['product_description'] = sale[2],
+            single_sale['product_description'] = sale[2]
             single_sale['product_category'] = sale[3]
             single_sale["product_price"] = sale[4]
             single_sale['attendant_id'] = sale[5]
@@ -288,10 +315,8 @@ class PostSale(Dtb):
         self.conn.close()
         return sales
 
-    def save_sale(self, new_sale):
-        self.attendant_id = new_sale['attendant_id']
-        self.product_id = new_sale['product_id']
-        self.product_quantity = new_sale['product_quantity']
+    def save_sale(self):
+        '''Populate the sales table'''
         db_obj = Dtb()
         db_obj.create_tables()
         self.conn = db_obj.connection()
