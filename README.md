@@ -25,7 +25,7 @@ https://documenter.getpostman.com/view/4074074/RzZ1qN7c
 `$ git@github.com:Hesbon5600/Store-Manager-V1.git"` 
   
 1. cd into the folder Store-Manager-V2  
-1. `git checkout bg-fix-bugs-v2-161502130`  
+1. `git checkout develop`  
 1. export required enviroments  
 	`export SECRET_KEY='yoursecretkey`  
 	`export DB_NAME="store_manager"`  
