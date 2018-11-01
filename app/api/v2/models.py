@@ -202,7 +202,7 @@ class PostProduct():
             single_product['lower_inventory'] = product[6]
             products.append(single_product)
 
-        self.conn.close()   
+        self.conn.close()
         return products
 
     def update_product(self, product_id):

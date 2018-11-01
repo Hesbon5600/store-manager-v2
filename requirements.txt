@@ -50,3 +50,4 @@ wrapt==1.10.11
 youtube-dl==2018.10.5
 zope.interface==4.5.0
 gunicorn==19.9.0
+coveralls

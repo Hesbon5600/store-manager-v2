@@ -38,7 +38,6 @@ class ValidateUser(User):
             if self.username == user["username"]:
                 message = "Username '" + self.username + "' already taken"
                 abort(406, message)
-        for user in self.user_obj:
             if self.email == user["email"]:
                 message = "Email '" + self.email + "' already taken"
                 abort(406, message)
@@ -91,22 +90,6 @@ class ValidateProduct():
                 abort(406, message)
 
     def validate_product_details(self):
-        '''  '''
-        # if type(self.title) != str:
-        #     message = "Product title must be a string"
-        #     abort(400, message)
-
-        # if type(self.category) != str:
-        #     message = "Product Category must be a string"
-        #     abort(400, message)
-
-        # if type(self.description) != str:
-        #     message = "Product Description must be a string"
-        #     abort(400, message)
-
-        # if type(self.quantity) != int:
-        #     message = "Product quantity must be a real number"
-        #     abort(400, message)
         if self.quantity < 0:
             message = "Product Quantity should be a positive value value"
             abort(400, message)

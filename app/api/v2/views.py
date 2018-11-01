@@ -2,7 +2,7 @@
 from functools import wraps
 import jwt
 from flask import Flask, jsonify, make_response, request
-from flask_restful import Api, Resource
+from flask_restful import Resource
 from werkzeug.security import check_password_hash
 from flask_expects_json import expects_json
 
