@@ -3,6 +3,7 @@ Store Manager is a web application that helps store owners manage sales and prod
 
 [![Build Status](https://travis-ci.org/Hesbon5600/store-manager-v2.svg?branch=develop)](https://travis-ci.org/Hesbon5600/store-manager-v2)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ea9c72b259e0ddb799ff/maintainability)](https://codeclimate.com/github/Hesbon5600/store-manager-v2/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/Hesbon5600/store-manager-v2/badge.svg?branch=bg-fixing-bugs-v2-161576896)](https://coveralls.io/github/Hesbon5600/store-manager-v2?branch=bg-fixing-bugs-v2-161576896)
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/694b6ed7daad7fca8e9f)
 
 Heroku link  
