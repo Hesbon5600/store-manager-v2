@@ -1,10 +1,12 @@
-from validate_email import validate_email
+'''All the validations are handled here'''
 import re
+from validate_email import validate_email
 from flask import make_response, jsonify, abort
 from .models import User, PostProduct
 
 
 class ValidateUser(User):
+    ''' Class that handles validating users input '''
     def __init__(self, data):
         self.username = data['username']
         self.email = data['email']
@@ -12,6 +14,7 @@ class ValidateUser(User):
         self.role = data['role']
 
     def validate_user_details(self):
+        ''' Check the input and eturn a message if an error is thrown '''
         self.user_obj = User.get_all_users(self)
         if not validate_email(self.email):
             message = "Email is invalid"
@@ -28,6 +31,9 @@ class ValidateUser(User):
         if self.role == "":
             message = "Role is missing"
             abort(400, message)
+        # if self.role != "admin" or self.role != 'attendant':
+        #     message = "Role must be 'admin' or 'attendant'"
+        #     abort(400, message)
         for user in self.user_obj:
             if self.username == user["username"]:
                 message = "Username '" + self.username + "' already taken"
@@ -66,6 +72,7 @@ class ValidateUser(User):
 
 
 class ValidateProduct():
+    ''' Handles Product validation  '''
     def __init__(self, data):
         self.title = data['title']
         self.category = data['category']
@@ -75,6 +82,8 @@ class ValidateProduct():
         self.lower_inventory = data['lower_inventory']
 
     def validate_duplicates(self):
+        '''Ensure no product shares a name with another product.'''
+        '''Not called when updating a product'''
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
             if product['title'] == self.title:
@@ -82,22 +91,22 @@ class ValidateProduct():
                 abort(406, message)
 
     def validate_product_details(self):
+        '''  '''
+        # if type(self.title) != str:
+        #     message = "Product title must be a string"
+        #     abort(400, message)
 
-        if type(self.title) != str:
-            message = "Product title must be a string"
-            abort(400, message)
+        # if type(self.category) != str:
+        #     message = "Product Category must be a string"
+        #     abort(400, message)
 
-        if type(self.category) != str:
-            message = "Product Category must be a string"
-            abort(400, message)
+        # if type(self.description) != str:
+        #     message = "Product Description must be a string"
+        #     abort(400, message)
 
-        if type(self.description) != str:
-            message = "Product Description must be a string"
-            abort(400, message)
-
-        if type(self.quantity) != int:
-            message = "Product quantity price must be a real number"
-            abort(400, message)
+        # if type(self.quantity) != int:
+        #     message = "Product quantity must be a real number"
+        #     abort(400, message)
         if self.quantity < 0:
             message = "Product Quantity should be a positive value value"
             abort(400, message)
@@ -106,14 +115,14 @@ class ValidateProduct():
             message = "Product price must be of the format 00.00"
             abort(400, message)
         if self.price < 0:
-            message = "Product price should be a positive value"
+            message = "Product price should be greater than 0"
             abort(400, message)
 
         if type(self.lower_inventory) != int:
-            message = "Product lower inventory must be a real number"
+            message = "Product lower inventory must be a whole number"
             abort(400, message)
         if self.lower_inventory < 0:
-            message = "Product price should be a positive value"
+            message = "Product price should be value greater than 0"
             abort(400, message)
         if self.lower_inventory > self.quantity:
             message = "Lower inventory should be less than the quantity"

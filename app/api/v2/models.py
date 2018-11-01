@@ -1,9 +1,10 @@
+''''''
 import os
 from datetime import datetime
 import psycopg2
-from flask import jsonify, make_response
-from instance.config import Config
+from flask import abort
 from werkzeug.security import generate_password_hash
+from instance.config import Config
 
 
 class Dtb():
@@ -30,42 +31,43 @@ class Dtb():
                     host=self.db_host
                 )
 
-        except Exception as e:
-            print(e)
+        except Exception as exception:
+            print(exception)
         return self.conn
 
     def create_tables(self):
         tables = [
 
             """
-            CREATE TABLE IF NOT EXISTS users (user_id serial PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS users (
+            user_id serial PRIMARY KEY,
             username varchar(30) not null,
             email varchar(50) not null,
             password varchar(250) not null,
             role varchar(10) not null)
             """,
             """
-                CREATE TABLE IF NOT EXISTS products (product_id serial PRIMARY KEY,
-                title varchar(30) not null,
-                description varchar(100) not null,
-                category varchar(30) not null,
-                price float(4) not null,
-                quantity int not null,
-                lower_inventory int not null)
+            CREATE TABLE IF NOT EXISTS products (
+            product_id serial PRIMARY KEY,
+            title varchar(30) not null,
+            description varchar(100) not null,
+            category varchar(30) not null,
+            price float(4) not null,
+            quantity int not null,
+            lower_inventory int not null)
             """,
-
             """
-                CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
-                attendant_id int REFERENCES users(user_id) not null,
-                product_id int REFERENCES products(product_id) not null)
-            """
+            CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
+            attendant_id int REFERENCES users(user_id) not null,
+            product_id int REFERENCES products(product_id) not null)
+            """,
         ]
         try:
             cur = self.connection().cursor()
             for table in tables:
                 cur.execute(table)
-        except Exception as e:
-            print(e)
+        except Exception as exception:
+            print(exception)
         self.conn.commit()
         self.conn.close()
 
@@ -74,6 +76,7 @@ class Dtb():
 
         sql = [
             "DROP TABLE IF EXISTS users CASCADE",
+            "DROP TABLE IF EXISTS products_sales CASCADE",
             "DROP TABLE IF EXISTS products CASCADE",
             "DROP TABLE IF EXISTS sales CASCADE"
         ]
@@ -86,30 +89,29 @@ class Dtb():
 class User(Dtb):
     def __init__(self, data=None):
         if data:
-            # print(data)
-            self.username = data['username']
-            self.password = generate_password_hash(data['password'])
-            self.email = data['email']
-            self.role = data['role']
-            db = Dtb()
-            db.create_tables()
+            self.username = data['username'].strip()
+            self.password = generate_password_hash(data['password'].strip())
+            self.email = data['email'].strip()
+            self.role = data['role'].strip()
+            db_obj = Dtb()
 
-            self.conn = db.connection()
+            self.conn = db_obj.connection()
 
     def save_user(self):
+        db_obj = Dtb()
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO users (username, email,\
+            password, role) VALUES (%s, %s, %s, %s)",
             (self.username, self.email, self.password, self.role),
         )
         self.conn.commit()
         self.conn.close()
 
     def get_all_users(self):
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM users")
         result = cur.fetchall()
@@ -126,24 +128,41 @@ class User(Dtb):
         self.conn.close()
         return users
 
+    def update_user(self, user_id):
+        db_obj = Dtb()
+        self.role = 'admin'
+        self.user_id = user_id
+        self.conn = db_obj.connection()
+        cur = self.conn.cursor()
+        cur.execute(
+            """UPDATE users SET role = %s WHERE user_id = %s""",
+            (self.role, self.user_id),
+        )
+
+        self.conn.commit()
+        self.conn.close()
+
 
 class PostProduct():
 
-    def save_product(self, data):
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
-        db = Dtb()
-        db.create_tables()
-        self.conn = db.connection()
+    def __init__(self, data=None):
+        if data:
+            self.title = data['title']
+            self.category = data['category']
+            self.description = data['description']
+            self.quantity = data['quantity']
+            self.price = data['price']
+            self.lower_inventory = data['lower_inventory']
+
+    def save_product(self):
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
 
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO products (title, description, category, price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO products (title, description, category,\
+            price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s, %s)",
             (self.title, self.description, self.category, self.price,
              self.quantity, self.lower_inventory),
         )
@@ -151,9 +170,8 @@ class PostProduct():
         self.conn.close()
 
     def get_all_products(self):
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM products")
         result = cur.fetchall()
@@ -173,42 +191,59 @@ class PostProduct():
         self.conn.close()
         return products
 
-    def update_product(self, data, productId):
-        db = Dtb()
-        self.productId = productId
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
-        self.poductID = productId
+    def update_product(self, product_id):
+        db_obj = Dtb()
+        self.product_id = product_id
 
-        self.conn = db.connection()
-        db.create_tables()
+        self.conn = db_obj.connection()
         cur = self.conn.cursor()
         cur.execute(
             "SELECT * FROM products WHERE title = %s", (self.title,))
         row = cur.fetchall()
         if row:
-            return jsonify({"message": "the title '" + self.title + "' is already in use"}), 400
+            message = "the title '" + self.title + "' is already in use"
+            abort(406, message)
 
         cur.execute(
             """UPDATE products SET title = %s, category = %s,
             price = %s, quantity = %s, lower_inventory = %s, description = %s
             WHERE product_id = %s""", (self.title, self.category, self.price,
                                        self.quantity, self.lower_inventory,
-                                       self.description, self.productId),
+                                       self.description, self.product_id),
         )
 
         self.conn.commit()
         self.conn.close()
 
-    def delete_product(self, productID):
-        self.product_id = productID
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
+    def update_sold_product(self, data, product_id):
+        db_obj = Dtb()
+        self.product_id = product_id
+        self.title = data['title']
+        self.category = data['category']
+        self.description = data['description']
+        self.quantity = data['quantity']
+        self.price = data['price']
+        self.lower_inventory = data['lower_inventory']
+        self.product_id = product_id
+
+        self.conn = db_obj.connection()
+        cur = self.conn.cursor()
+        cur.execute(
+            """UPDATE products SET title = %s, category = %s,
+            price = %s, quantity = %s, lower_inventory = %s, description = %s
+            WHERE product_id = %s""", (self.title, self.category, self.price,
+                                       self.quantity, self.lower_inventory,
+                                       self.description, self.product_id),
+        )
+
+        self.conn.commit()
+        self.conn.close()
+
+    def delete_product(self, product_id):
+        self.product_id = product_id
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
+        db_obj.create_tables()
         cur = self.conn.cursor()
 
         # delete a product
@@ -217,38 +252,49 @@ class PostProduct():
                 "DELETE FROM products WHERE product_id = %s",
                 (self.product_id, )
             )
-        except Exception as e:
-            print(e)
+        except Exception as exception:
+            print(exception)
         self.conn.commit()
         self.conn.close()
 
 
 class PostSale(Dtb):
     def get_all_sales(self):
-        db = Dtb()
-        self.conn = db.connection()
-        db.create_tables()
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
         cur = self.conn.cursor()
-        cur.execute("SELECT * FROM sales")
+        cur.execute("SELECT products.product_id, products.title,\
+        products.description, products.category, products.price,\
+        users.user_id, users.username, sales.sale_id\
+        FROM products JOIN sales ON\
+        products.product_id=sales.product_id JOIN users ON\
+        users.user_id=sales.attendant_id")
+        # cur.execute("SELECT * FROM sales")
         result = cur.fetchall()
         sales = []
 
-        for product in result:
+        for sale in result:
             single_sale = {}
-            single_sale['sale_id'] = product[0]
-            single_sale["attendant_id"] = product[1]
-            single_sale['product_id'] = product[2]
+            single_sale['product_id'] = sale[0]
+            single_sale['product_title'] = sale[1]
+            single_sale['product_description'] = sale[2],
+            single_sale['product_category'] = sale[3]
+            single_sale["product_price"] = sale[4]
+            single_sale['attendant_id'] = sale[5]
+            single_sale['attendant_name'] = sale[6]
+            single_sale['sale_id'] = sale[7]
             sales.append(single_sale)
 
         self.conn.close()
         return sales
 
-    def save_sale(self, attendant_id, product_id):
-        self.attendant_id = attendant_id
-        self.product_id = product_id
-        db = Dtb()
-        db.create_tables()
-        self.conn = db.connection()
+    def save_sale(self, new_sale):
+        self.attendant_id = new_sale['attendant_id']
+        self.product_id = new_sale['product_id']
+        self.product_quantity = new_sale['product_quantity']
+        db_obj = Dtb()
+        db_obj.create_tables()
+        self.conn = db_obj.connection()
 
         cur = self.conn.cursor()
 
@@ -256,5 +302,8 @@ class PostSale(Dtb):
             "INSERT INTO sales (attendant_id, product_id) VALUES (%s, %s)",
             (self.attendant_id, self.product_id),
         )
+        cur.execute(
+            "SELECT * FROM sales WHERE product_id = %s", (self.product_id,))
+        row = cur.fetchall()
         self.conn.commit()
         self.conn.close()
