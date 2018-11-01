@@ -1,4 +1,4 @@
-
+'''The predefined properties of the input fields for the app'''
 PRODUCT_JSON = {
     'type': 'object',
     'maxProperties': 6,

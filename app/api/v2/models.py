@@ -1,3 +1,4 @@
+''''''
 import os
 from datetime import datetime
 import psycopg2
@@ -88,7 +89,6 @@ class Dtb():
 class User(Dtb):
     def __init__(self, data=None):
         if data:
-            # print(data)
             self.username = data['username'].strip()
             self.password = generate_password_hash(data['password'].strip())
             self.email = data['email'].strip()
@@ -102,7 +102,8 @@ class User(Dtb):
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO users (username, email,\
+            password, role) VALUES (%s, %s, %s, %s)",
             (self.username, self.email, self.password, self.role),
         )
         self.conn.commit()
@@ -144,20 +145,24 @@ class User(Dtb):
 
 class PostProduct():
 
-    def save_product(self, data):
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
+    def __init__(self, data=None):
+        if data:
+            self.title = data['title']
+            self.category = data['category']
+            self.description = data['description']
+            self.quantity = data['quantity']
+            self.price = data['price']
+            self.lower_inventory = data['lower_inventory']
+
+    def save_product(self):
         db_obj = Dtb()
         self.conn = db_obj.connection()
 
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO products (title, description, category, price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO products (title, description, category,\
+            price, quantity, lower_inventory) VALUES (%s, %s, %s, %s, %s, %s)",
             (self.title, self.description, self.category, self.price,
              self.quantity, self.lower_inventory),
         )
@@ -186,15 +191,8 @@ class PostProduct():
         self.conn.close()
         return products
 
-    def update_product(self, data, product_id):
+    def update_product(self, product_id):
         db_obj = Dtb()
-        self.product_id = product_id
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
         self.product_id = product_id
 
         self.conn = db_obj.connection()
@@ -267,7 +265,8 @@ class PostSale(Dtb):
         cur = self.conn.cursor()
         cur.execute("SELECT products.product_id, products.title,\
         products.description, products.category, products.price,\
-        users.user_id, users.username, sales.sale_id FROM products JOIN sales ON\
+        users.user_id, users.username, sales.sale_id\
+        FROM products JOIN sales ON\
         products.product_id=sales.product_id JOIN users ON\
         users.user_id=sales.attendant_id")
         # cur.execute("SELECT * FROM sales")

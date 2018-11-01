@@ -1,3 +1,4 @@
+'''All the validations are handled here'''
 import re
 from validate_email import validate_email
 from flask import make_response, jsonify, abort

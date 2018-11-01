@@ -1,21 +1,22 @@
+'''Handles all functionality of routing requests'''
 from functools import wraps
-
 import jwt
 from flask import Flask, jsonify, make_response, request
 from flask_restful import Api, Resource
 from werkzeug.security import check_password_hash
-
 from flask_expects_json import expects_json
-from instance.config import app_config
 
+from instance.config import app_config
 from .expected_json import *
 from .models import *
 from .utils import *
 import datetime
 
 
-def token_required(f):
-    @wraps(f)
+def token_required(func):
+    '''Define a wrapper that handles decoding of the token'''
+    '''Identifies the user whom the token belongs to'''
+    @wraps(func)
     def decorated(*args, **kwargs):
         user_obj = User()
         users = user_obj.get_all_users()
@@ -29,7 +30,8 @@ def token_required(f):
             }), 401)
         try:
             data = jwt.decode(
-                token, app_config['development'].SECRET_KEY, algorithms=['HS256'])
+                token, app_config['development'].SECRET_KEY,
+                algorithms=['HS256'])
 
             for user in users:
                 if user['username'] == data['username']:
@@ -38,13 +40,16 @@ def token_required(f):
             print(e)
             return make_response(jsonify({'Message': 'Token is invalid'}),
                                  403)
-        return f(current_user, *args, **kwargs)
+        return func(current_user, *args, **kwargs)
     return decorated
 
 
 class UserRegistration(Resource):
+    '''Handles user registration'''
     @expects_json(USER_REGISTRATION_JSON)
     def post(self):
+        '''Get data from the user, call validation method'''
+        '''pass the data to the User class for saving'''
         data = request.get_json()
         if not data:
             return make_response(jsonify({
@@ -64,8 +69,10 @@ class UserRegistration(Resource):
 
 
 class UserLogin(Resource):
+    '''Registered users can login'''
     @expects_json(USER_LOGIN_JSON)
     def post(self):
+        '''User provides username and password'''
         self.user_obj = User.get_all_users(self)
         data = request.get_json()
         username = data['username'].strip()
@@ -79,17 +86,19 @@ class UserLogin(Resource):
                                          }), 400)
 
         for user in self.user_obj:
-            if user['username'] == username and check_password_hash(user["password"],
-                                                                    password):
+            if user['username'] == username and\
+                check_password_hash(user["password"],
+                                    password):
                 token = jwt.encode(
                     {'username': user['username'],
                      'exp': datetime.datetime.utcnow() +
                      datetime.timedelta(minutes=3000)},
                     app_config['development'].SECRET_KEY, algorithm='HS256')
                 return make_response(
-                    jsonify({'Message': "Successfully logged in as '" + user['role'],
-                             'token': token.decode('UTF-8')
-                             }), 200)
+                    jsonify(
+                        {'Message': "Successfully logged in as '" + user['role'],
+                         'token': token.decode('UTF-8')
+                         }), 200)
 
         return make_response(jsonify({
             'Status': 'Failed',
@@ -98,8 +107,11 @@ class UserLogin(Resource):
 
 
 class PromoteUser(Resource):
+    '''Make an attendant to be an admin'''
     @token_required
     def put(current_user, self, user_id):
+        '''Takes the user_id and updates the role to admin'''
+        '''The initial role must be an attendant'''
         self.user_id = int(user_id)
         self.user_obj = User.get_all_users(self)
         # data = request.get_json()
@@ -114,7 +126,6 @@ class PromoteUser(Resource):
                     'Status': 'Failed',
                     'Message': "No such user"
                 }), 400)
-                # print(user)
             if user['role'] == 'admin':
                 return make_response(jsonify({
                     'Status': 'Failed',
@@ -122,16 +133,20 @@ class PromoteUser(Resource):
                 }), 400)
             update_user = User()
             update_user.update_user(self.user_id)
-            return make_response(jsonify({
-                'Status': 'Ok',
-                'Message': "User '" + user['username'] + "' has been promoted to admin"
-            }), 200)
+            return make_response(
+                jsonify({
+                    'Status': 'Ok',
+                    'Message': "User '" + user['username'] + "' has been promoted to admin"
+                }), 200)
 
 
 class Product(Resource):
+    '''Deals with posting a product and\
+    returning the products from db'''
     # Get all products
     @token_required
     def get(current_user, self):
+        '''Function to return the saved users from the database'''
         self.prod_obj = PostProduct.get_all_products(self)
         if not current_user:
             response = make_response(jsonify({
@@ -155,12 +170,8 @@ class Product(Resource):
     @token_required
     @expects_json(PRODUCT_JSON)
     def post(current_user, self):
+        '''Take the product data and save it in a database'''
         data = request.get_json()
-        if not data or "title" not in data or 'category' not in data or 'description' not in data or 'price' not in data or 'lower_inventory' not in data or 'quantity' not in data:
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'Message': "Chech your input"
-            }), 401)
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
                 'Status': 'Failed',
@@ -170,8 +181,8 @@ class Product(Resource):
             valid_product = ValidateProduct(data)
             valid_product.validate_duplicates()
             valid_product.validate_product_details()
-            product = PostProduct()
-            product.save_product(data)
+            product = PostProduct(data)
+            product.save_product()
 
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
@@ -184,9 +195,11 @@ class Product(Resource):
 
 
 class SingleProduct(Resource):
-    # Get a single product
+    '''Get a single product from the DB'''
     @token_required
     def get(current_user, self, product_id):
+        '''Given the product ID select a\
+        product that matches it from the DB'''
         self.prod_obj = PostProduct.get_all_products(self)
         if not current_user:
             return make_response(jsonify({
@@ -209,6 +222,7 @@ class SingleProduct(Resource):
     @token_required
     @expects_json(PRODUCT_JSON)
     def put(current_user, self, product_id):
+        '''Update a specific product details'''
         self.product_Id = int(product_id)
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
@@ -221,8 +235,8 @@ class SingleProduct(Resource):
             valid_product.validate_product_details()
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
-                product = PostProduct()
-                product.update_product(data, self.product_Id)
+                product = PostProduct(data)
+                product.update_product(dataself.product_Id)
                 return make_response(jsonify({
                     'Status': 'Ok',
                     'Message': "Product updated Successfully",
@@ -236,6 +250,7 @@ class SingleProduct(Resource):
 
     @token_required
     def delete(current_user, self, product_id):
+        '''Delete a specific product'''
         self.product_Id = int(product_id)
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
@@ -266,10 +281,11 @@ class SingleProduct(Resource):
 
 
 class Sale(Resource):
-    # Make a sales
+    '''Post and get sales'''
     @token_required
     @expects_json(SALE_JSON)
     def post(current_user, self):
+        '''Attendant can make a sale'''
         total = 0
         data = request.get_json()
         if current_user and current_user['role'] != 'attendant':
@@ -283,7 +299,7 @@ class Sale(Resource):
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
             if product['title'] == data['product_title'] \
-             and int(product['quantity']) < 1:
+                    and int(product['quantity']) < 1:
                 return make_response(jsonify({
                     'Status': 'Failed',
                     'Message': "No more products to sell"
@@ -327,6 +343,7 @@ class Sale(Resource):
     # Get all sale entries
     @token_required
     def get(current_user, self):
+        '''Admin can get all sales'''
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
                 'Status': 'Failed',
@@ -348,8 +365,11 @@ class Sale(Resource):
 
 
 class SingleSale(Resource):
+    '''Getting a single sale record'''
     @token_required
     def get(current_user, self, sale_id):
+        '''Admin and the attendant who made the sale\
+        Can view the sale record'''
         self.sale_obj = PostSale.get_all_sales(self)
         for sale in self.sale_obj:
             if current_user['role'] == 'admin':

@@ -1,3 +1,4 @@
+'''Module for the sutup and teardown'''
 import unittest
 import json
 from app.api.v2.models import *
@@ -6,7 +7,7 @@ from instance.config import app_config
 
 
 class BaseTest(unittest.TestCase):
-
+    '''Define setup and teardown methods '''
     def setUp(self):
         # Create a database object
         self.db_object = Dtb()
