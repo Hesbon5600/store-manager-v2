@@ -1,5 +1,4 @@
 '''Run the application'''
-from flask import jsonify, make_response
 from app import create_app
 from app.api.v2.models import Dtb
 

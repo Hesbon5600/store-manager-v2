@@ -65,7 +65,7 @@ class Dtb():
             """
             CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
             attendant_id int REFERENCES users(user_id) not null,
-            product_id int REFERENCES products(product_id) not null)
+            product_id int REFERENCES products(product_id) ON DELETE RESTRICT)
             """,
         ]
         try:
@@ -102,9 +102,8 @@ class User(Dtb):
             self.password = generate_password_hash(data['password'].strip())
             self.email = data['email'].strip()
             self.role = data['role'].strip()
-            db_obj = Dtb()
-
-            self.conn = db_obj.connection()
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
 
     def save_user(self):
         '''Save the users information in the database'''
@@ -203,7 +202,7 @@ class PostProduct():
             single_product['lower_inventory'] = product[6]
             products.append(single_product)
 
-        self.conn.close()
+        self.conn.close()   
         return products
 
     def update_product(self, product_id):
