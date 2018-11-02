@@ -9,6 +9,7 @@ from instance.config import Config
 
 class Dtb():
     '''Create connection to the database'''
+
     def __init__(self):
         '''Get the connection variables'''
         self.db_name = Config.DB_NAME
@@ -65,8 +66,13 @@ class Dtb():
             """
             CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
             attendant_id int REFERENCES users(user_id) not null,
-            product_id int REFERENCES products(product_id) ON DELETE RESTRICT)
+            product_id int REFERENCES products(product_id) ON DELETE CASCADE)
             """,
+            """
+            CREATE TABLE IF NOT EXISTS token_blacklist
+            (token_id serial PRIMARY KEY,
+            invalid_token varchar(255) not null)
+            """
         ]
         try:
             cur = self.connection().cursor()
@@ -95,6 +101,7 @@ class Dtb():
 
 class User(Dtb):
     '''Save, get and update users'''
+
     def __init__(self, data=None):
         '''Get the user  data'''
         if data:
@@ -109,7 +116,7 @@ class User(Dtb):
         '''Save the users information in the database'''
         db_obj = Dtb()
         cur = self.conn.cursor()
-
+        print(self.username)
         cur.execute(
             "INSERT INTO users (username, email,\
             password, role) VALUES (%s, %s, %s, %s)",
@@ -153,9 +160,28 @@ class User(Dtb):
         self.conn.commit()
         self.conn.close()
 
+    def logout(self, token):
+        print(token)
+        self.token = str(token)
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
+        cur = self.conn.cursor()
+        try:
+            cur.execute(
+            "INSERT INTO token_blacklist (token)\
+             VALUES (%s)",
+            (self.token),
+            )
+        except Exception as exception:
+            print(exception)
+        return True
+        self.conn.commit()
+        self.conn.close()
+
 
 class PostProduct():
     '''Save, get, and update products'''
+
     def __init__(self, data=None):
         '''Get the product data'''
         if data:
@@ -212,12 +238,6 @@ class PostProduct():
 
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
-        cur.execute(
-            "SELECT * FROM products WHERE title = %s", (self.title,))
-        row = cur.fetchall()
-        if row:
-            message = "the title '" + self.title + "' is already in use"
-            abort(406, message)
 
         cur.execute(
             """UPDATE products SET title = %s, category = %s,
@@ -277,6 +297,7 @@ class PostProduct():
 
 class PostSale(Dtb):
     '''Post, and get sales from the database'''
+
     def __init__(self, new_sale=None):
         '''Get the values from user input'''
         if new_sale:

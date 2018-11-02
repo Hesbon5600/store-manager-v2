@@ -97,9 +97,7 @@ class BaseTest(unittest.TestCase):
             })
 
         self.context = self.app.app_context()
-        self.context.push()
 
     def tearDown(self):
         # Delete the created
         self.db_object.destroy_tables()
-        return self.context.pop()

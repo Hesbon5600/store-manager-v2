@@ -8,10 +8,10 @@ from .models import User, PostProduct
 class ValidateUser(User):
     ''' Class that handles validating users input '''
     def __init__(self, data):
-        self.username = data['username']
-        self.email = data['email']
-        self.password = data['password']
-        self.role = data['role']
+        self.username = data['username'].strip()
+        self.email = data['email'].strip()
+        self.password = data['password'].strip()
+        self.role = data['role'].strip()
 
     def validate_user_details(self):
         ''' Check the input and eturn a message if an error is thrown '''
@@ -31,9 +31,6 @@ class ValidateUser(User):
         if self.role == "":
             message = "Role is missing"
             abort(400, message)
-        # if self.role != "admin" or self.role != 'attendant':
-        #     message = "Role must be 'admin' or 'attendant'"
-        #     abort(400, message)
         for user in self.user_obj:
             if self.username == user["username"]:
                 message = "Username '" + self.username + "' already taken"
@@ -101,9 +98,6 @@ class ValidateProduct():
             message = "Product price should be greater than 0"
             abort(400, message)
 
-        if type(self.lower_inventory) != int:
-            message = "Product lower inventory must be a whole number"
-            abort(400, message)
         if self.lower_inventory < 0:
             message = "Product price should be value greater than 0"
             abort(400, message)
