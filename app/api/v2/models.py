@@ -161,7 +161,6 @@ class User(Dtb):
         self.conn.close()
 
     def logout(self, token):
-        print(token)
         db_obj = Dtb()
         self.conn = db_obj.connection()
         cur = self.conn.cursor()

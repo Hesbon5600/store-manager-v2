@@ -285,7 +285,6 @@ class SingleProduct(Resource):
     def delete(current_user, self, product_id):
         '''Delete a specific product'''
         self.product_Id = int(product_id)
-        data = request.get_json()
         if current_user and current_user['role'] != "admin":
             return make_response(jsonify({
                 'Status': 'Failed',
@@ -403,7 +402,6 @@ class SingleSale(Resource):
         '''Admin and the attendant who made the sale\
         Can view the sale record'''
         self.sale_obj = PostSale.get_all_sales(self)
-        print(self.sale_obj)
         for sale in self.sale_obj:
             if current_user['role'] == 'admin' or current_user['user_id'] == sale['attendant_id']:
                 if int(sale_id) == sale['sale_id']:
