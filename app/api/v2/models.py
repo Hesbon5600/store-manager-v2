@@ -71,7 +71,7 @@ class Dtb():
             """
             CREATE TABLE IF NOT EXISTS token_blacklist
             (token_id serial PRIMARY KEY,
-            invalid_token varchar(255) not null)
+            invalid_token text not null)
             """
         ]
         try:
@@ -162,20 +162,32 @@ class User(Dtb):
 
     def logout(self, token):
         print(token)
-        self.token = str(token)
         db_obj = Dtb()
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
         try:
             cur.execute(
-            "INSERT INTO token_blacklist (token)\
+                "INSERT INTO token_blacklist (invalid_token)\
              VALUES (%s)",
-            (self.token),
+                (token,),
             )
         except Exception as exception:
             print(exception)
-        return True
         self.conn.commit()
+        self.conn.close()
+        return True
+
+    def get_invalid_tokens(self, token):
+        '''Retrieve all users'''
+        db_obj = Dtb()
+        self.conn = db_obj.connection()
+        cur = self.conn.cursor()
+
+        cur.execute("""SELECT * FROM token_blacklist WHERE invalid_token = %s""",
+                    (token,),)
+        result = cur.fetchone()
+        if result:
+            return True
         self.conn.close()
 
 

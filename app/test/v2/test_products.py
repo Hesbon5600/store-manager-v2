@@ -49,9 +49,9 @@ class TestProducts(BaseTest):
         '''User cannot get products if not logged in'''
         response = self.test_client.get(
             '/api/v2/products')
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json[
-                         'Message'], "Token is missing, You must login first")
+                         'Message'], "Token is invalid")
 
     def test_description_not_string(self):
         '''Description of the products must be a string'''

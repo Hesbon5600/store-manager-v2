@@ -20,14 +20,17 @@ def token_required(func):
     def decorated(*args, **kwargs):
         user_obj = User()
         users = user_obj.get_all_users()
+
         token = None
         current_user = None
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
-        if not token:
+        invalid_token = user_obj.get_invalid_tokens(token)
+        if invalid_token:
             return make_response(jsonify({
-                'Message': 'Token is missing, You must login first'
+                'Message': 'You are logged out You must login again'
             }), 401)
+        print(invalid_token)
         try:
             data = jwt.decode(
                 token, app_config['development'].SECRET_KEY,
@@ -109,6 +112,29 @@ class UserLogin(Resource):
         }), 404)
 
 
+class Logout(Resource):
+    @token_required
+    def post(current_user, self):
+        if not current_user:
+            return make_response(jsonify({
+                'Message': 'You are not logged in'
+            }), 401)
+        user_obj = User()
+        users = user_obj.get_all_users()
+        token = None
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+        if not token:
+            return make_response(jsonify({
+                'Message': 'You are not logged in'
+            }), 401)
+        logout = User().logout(token)
+        if logout:
+            return make_response(jsonify({
+                'Message': 'You have logged out'
+            }), 200)
+
+
 class PromoteUser(Resource):
     '''Make an attendant to be an admin'''
     @token_required
@@ -142,25 +168,6 @@ class PromoteUser(Resource):
             'Message': "No such user",
             'All users': self.user_obj
         }), 400)
-
-
-class Logout(Resource):
-    @token_required
-    def post(current_user, self):
-        if len(current_user) < 0:
-            return make_response(jsonify({
-                'Message': 'You are not logged in'
-            }), 401)
-        user_obj = User()
-        users = user_obj.get_all_users()
-        token = None
-        if 'x-access-token' in request.headers:
-            token = str(request.headers['x-access-token'])
-        logout = User().logout(token)
-        if logout:
-            return make_response(jsonify({
-                'Message': 'You have logged out'
-            }), 200)
 
 
 class Product(Resource):
