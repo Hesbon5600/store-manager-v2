@@ -17,9 +17,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']})
+            headers=self.admin_header)
         self.assertEqual(response.json[
                          'Message'], "Product created Successfully")
         self.assertEqual(response.status_code, 201)
@@ -29,9 +27,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=self.product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.attendant_token['token']})
+            headers=self.attendant_header)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json[
                          'Message'], "You must be an admin")
@@ -39,8 +35,7 @@ class TestProducts(BaseTest):
     def test_get_all_products(self):
         '''User can get all products'''
         response = self.test_client.get(
-            '/api/v2/products', headers={
-                'x-access-token': self.attendant_token['token']})
+            '/api/v2/products', headers=self.attendant_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
                          'Message'], "Successfully fetched all products")
@@ -66,10 +61,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "78768 is not of type 'string'")
@@ -87,10 +79,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "65654 is not of type 'string'")
@@ -108,10 +97,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "'500' is not of type 'integer'")
@@ -129,10 +115,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "Product price must be of the format 00.00")
@@ -150,10 +133,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "45.5 is not of type 'integer'")
@@ -171,10 +151,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "Product Quantity should be a positive value value")
@@ -192,10 +169,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "Product price should be value greater than 0")
@@ -213,10 +187,7 @@ class TestProducts(BaseTest):
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.admin_token['token']
-            })
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
                          'message'], "Product price should be greater than 0")
@@ -225,8 +196,7 @@ class TestProducts(BaseTest):
         '''User can get a single product'''
         response = self.test_client.get(
             '/api/v2/products/1',
-            headers={
-                'x-access-token': self.admin_token['token']})
+            headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
                          'Message'], "Successfully fetched one product")
@@ -234,8 +204,7 @@ class TestProducts(BaseTest):
     def test_delete_a_products(self):
         '''Admin can delete a product'''
         response = self.test_client.delete(
-            '/api/v2/products/1', headers={
-                'x-access-token': self.admin_token['token']})
+            '/api/v2/products/1', headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
                          'Message'], "Product deleted Successfully")

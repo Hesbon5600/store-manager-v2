@@ -8,6 +8,7 @@ from instance.config import app_config
 
 class BaseTest(unittest.TestCase):
     '''Define setup and teardown methods '''
+
     def setUp(self):
         # Create a database object
         self.db_object = Dtb()
@@ -54,13 +55,14 @@ class BaseTest(unittest.TestCase):
             "product_title": "omoo",
             "product_quantity": 1
         })
+        self.general_header = {
+                'content-type': 'application/json'
+            }
         # Signup admin
         self.signup_admin = self.test_client.post(
             "/api/v2/auth/signup",
             data=self.admin_info,
-            headers={
-                'content-type': 'application/json'
-            })
+            headers=self.general_header)
         # Login admin and get the token
         login_admin = self.test_client.post(
             "/api/v2/auth/login",
@@ -72,29 +74,30 @@ class BaseTest(unittest.TestCase):
         signup_attendant = self.test_client.post(
             "/api/v2/auth/signup",
             data=self.attendant_info,
-            headers={
-                'content-type': 'application/json'
-            })
+            headers=self.general_header)
 
         login_attendant = self.test_client.post(
             "/api/v2/auth/login",
             data=self.attendant_login_info,
             content_type='application/json')
         self.attendant_token = json.loads(login_attendant.data.decode())
+        self.admin_header = {
+            'x-access-token': self.admin_token['token'],
+            'content-type': 'application/json'
+        }
+        self.attendant_header = {
+            'x-access-token': self.attendant_token['token'],
+            'content-type': 'application/json'
+        }
 
         self.test_client.post("/api/v2/products",
+                              headers=self.admin_header,
                               data=self.product,
-                              headers={
-                                  'x-access-token': self.admin_token['token'],
-                                  'content-type': 'application/json'
-                              })
+                              )
         self.create_sale = self.test_client.post(
             "/api/v2/sales",
             data=self.sale,
-            headers={
-                'content-type': 'application/json',
-                'x-access-token': self.attendant_token['token']
-            })
+            headers=self.attendant_header)
 
         self.context = self.app.app_context()
 

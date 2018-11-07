@@ -9,9 +9,7 @@ class TestSales(BaseTest):
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "omoo",
                                                           "product_quantity": 1}),
-                                         headers={
-                                             'content-type': 'application/json',
-                                             'x-access-token': self.admin_token['token']})
+                                         headers=self.admin_header)
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json[
@@ -22,9 +20,7 @@ class TestSales(BaseTest):
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "omoo",
                                                           "product_quantity": 1}),
-                                         headers={
-                                             'content-type': 'application/json',
-                                             'x-access-token': self.attendant_token['token']})
+                                         headers=self.attendant_header)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json[
@@ -41,9 +37,7 @@ class TestSales(BaseTest):
         response = self.test_client.post("/api/v1/sales",
                                          data=json.dumps({"product_title": "omoo",
                                                           "product_quantity": 1}),
-                                         headers={
-                                             'content-type': 'application/json',
-                                             'x-access-token': self.attendant_token['token']})
+                                         headers=self.attendant_header)
 
         self.assertEqual(response.status_code, 404)
 
@@ -52,32 +46,26 @@ class TestSales(BaseTest):
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "salt",
                                                           "product_quantity": 1}),
-                                         headers={
-                                             'content-type': 'application/json',
-                                             'x-access-token': self.attendant_token['token']})
+                                         headers=self.attendant_header)
 
         self.assertEqual(response.status_code, 404)
 
     def test_admin_get_all_sales(self):
         '''Admin can get all sales'''
-        response = self.test_client.get('/api/v2/sales', headers={
-            'x-access-token': self.admin_token['token']})
+        response = self.test_client.get('/api/v2/sales', headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
 
     def test_attendant_get_all_sales(self):
         '''Attendant cannot get all sales'''
-        response = self.test_client.get('/api/v2/sales', headers={
-            'x-access-token': self.attendant_token['token']})
+        response = self.test_client.get('/api/v2/sales', headers=self.attendant_header)
         self.assertEqual(response.status_code, 403)
 
     def test_admin_get_single_sale(self):
         '''Admin can get a single sale'''
-        response = self.test_client.get('/api/v2/sales/1', headers={
-            'x-access-token': self.admin_token['token']})
+        response = self.test_client.get('/api/v2/sales/1', headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
 
     def test_attendant_get_single_sale(self):
         '''Attendant cannot get a single sale'''
-        response = self.test_client.get('/api/v2/sales/1', headers={
-            'x-access-token': self.attendant_token['token']})
+        response = self.test_client.get('/api/v2/sales/1', headers=self.attendant_header)
         self.assertEqual(response.status_code, 200)

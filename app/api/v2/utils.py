@@ -32,7 +32,7 @@ class ValidateUser(User):
             message = "Role is missing"
             abort(400, message)
         for user in self.user_obj:
-            if self.username == user["username"]:
+            if self.username.lower() == user["username"].lower():
                 message = "Username '" + self.username + "' already taken"
                 abort(406, message)
             if self.email == user["email"]:
@@ -82,7 +82,7 @@ class ValidateProduct():
         '''Not called when updating a product'''
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
-            if product['title'] == self.title:
+            if product['title'].lower() == self.title.lower():
                 message = "Product: '" + self.title + "' already exists"
                 abort(406, message)
 
