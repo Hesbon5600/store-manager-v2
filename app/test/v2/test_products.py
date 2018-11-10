@@ -64,7 +64,7 @@ class TestProducts(BaseTest):
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
-                         'message'], "78768 is not of type 'string'")
+                         'message'], "5656 is not of type 'string'")
 
     def test_category_not_string(self):
         '''Category of the products must be a string'''
