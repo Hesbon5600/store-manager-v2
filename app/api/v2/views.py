@@ -1,3 +1,4 @@
+
 '''Handles all functionality of routing requests'''
 from functools import wraps
 import jwt
@@ -134,6 +135,24 @@ class Logout(Resource):
             }), 200)
 
 
+class GetUsers(Resource):
+    '''Get all users'''
+    @token_required
+    def get(current_user, self):
+        '''Get all users from the database'''
+        if current_user and current_user['role'] != "admin":
+            return make_response(jsonify({
+                'Status': 'Failed',
+                'message': "You must be an admin"
+            }), 401)
+        self.user_obj = User.get_all_users(self)
+        return make_response(jsonify({
+                'Status': 'Ok',
+                'message': "Successfully fetched all users",
+                'users': self.user_obj
+            }), 200)
+
+
 class PromoteUser(Resource):
     '''Make an attendant to be an admin'''
     @token_required
@@ -160,7 +179,7 @@ class PromoteUser(Resource):
                 return make_response(
                     jsonify({
                         'Status': 'Ok',
-                        'message': "User '" + user['username'] + "' has been promoted to admin"
+                        'message': "User has been promoted to admin"
                     }), 200)
         return make_response(jsonify({
             'Status': 'Failed',
@@ -264,6 +283,9 @@ class SingleProduct(Resource):
             valid_product.validate_product_details()
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
+                if int(product['product_id']) != int(product_id) and product['title'].lower() == data['title'].lower():
+                    message = "Product: '" + product['title'] + "' already exists"
+                    abort(406, message)
                 if int(product['product_id']) == int(product_id):
                     new_prod = PostProduct(data)
                     new_prod.update_product(self.product_Id)
@@ -389,7 +411,7 @@ class Sale(Resource):
             response = make_response(jsonify({
                 'Status': 'Ok',
                 'message': "Success",
-                'My Sales': self.sale_obj
+                'Sales': self.sale_obj
             }), 200)
         else:
             response = make_response(jsonify({

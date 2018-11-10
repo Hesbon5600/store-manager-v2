@@ -66,6 +66,7 @@ class Dtb():
             """
             CREATE TABLE IF NOT EXISTS sales (sale_id serial PRIMARY KEY,
             attendant_id int REFERENCES users(user_id) not null,
+            quantity_sold int not null,
             product_id int REFERENCES products(product_id) ON DELETE CASCADE)
             """,
             """
@@ -322,7 +323,7 @@ class PostSale(Dtb):
         self.conn = db_obj.connection()
         cur = self.conn.cursor()
         cur.execute("SELECT products.product_id, products.title,\
-        products.description, products.category, products.price,\
+        products.description, sales.quantity_sold, products.quantity, products.category, products.price,\
         users.user_id, users.username, sales.sale_id\
         FROM products JOIN sales ON\
         products.product_id=sales.product_id JOIN users ON\
@@ -336,11 +337,13 @@ class PostSale(Dtb):
             single_sale['product_id'] = sale[0]
             single_sale['product_title'] = sale[1]
             single_sale['product_description'] = sale[2]
-            single_sale['product_category'] = sale[3]
-            single_sale["product_price"] = sale[4]
-            single_sale['attendant_id'] = sale[5]
-            single_sale['attendant_name'] = sale[6]
-            single_sale['sale_id'] = sale[7]
+            single_sale['quantity_sold'] = sale[3]
+            single_sale['product_quantity'] = sale[4]
+            single_sale['product_category'] = sale[5]
+            single_sale["product_price"] = sale[6]
+            single_sale['attendant_id'] = sale[7]
+            single_sale['attendant_name'] = sale[8]
+            single_sale['sale_id'] = sale[9]
             sales.append(single_sale)
 
         self.conn.close()
@@ -355,8 +358,8 @@ class PostSale(Dtb):
         cur = self.conn.cursor()
 
         cur.execute(
-            "INSERT INTO sales (attendant_id, product_id) VALUES (%s, %s)",
-            (self.attendant_id, self.product_id),
+            "INSERT INTO sales (attendant_id, product_id, quantity_sold) VALUES (%s, %s, %s)",
+            (self.attendant_id, self.product_id, self.product_quantity),
         )
         cur.execute(
             "SELECT * FROM sales WHERE product_id = %s", (self.product_id,))
