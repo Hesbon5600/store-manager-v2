@@ -8,29 +8,29 @@ class TestSales(BaseTest):
         '''Admin can post a sale'''
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "omoo",
-                                                          "product_quantity": 1}),
+                                                          "product_quantity": "1"}),
                                          headers=self.admin_header)
 
-        self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json[
-                         'Message'], "You must be an attendant")
+                         'message'], "You must be an attendant")
+        self.assertEqual(response.status_code, 403)
 
     def test_post_sale_attendant(self):
         '''Attendant cannot post a sale'''
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "omoo",
-                                                          "product_quantity": 1}),
+                                                          "product_quantity": "1"}),
                                          headers=self.attendant_header)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json[
-                         'Message'], "Sale made successfully")
+                         'message'], "Sale made successfully")
 
     def test_product_out_of_stock(self):
         '''Impossible to sell products out of stock'''
         self.test_client.post("/api/v2/sales",
                               data=json.dumps({"product_title": "omoo",
-                                               "product_quantity": 1}),
+                                               "product_quantity": "1"}),
                               headers={
                                   'content-type': 'application/json',
                                   'x-access-token': self.attendant_token['token']})
@@ -45,7 +45,7 @@ class TestSales(BaseTest):
         '''Non existent products cannot be userd to post a sale'''
         response = self.test_client.post("/api/v2/sales",
                                          data=json.dumps({"product_title": "salt",
-                                                          "product_quantity": 1}),
+                                                          "product_quantity": "1"}),
                                          headers=self.attendant_header)
 
         self.assertEqual(response.status_code, 404)

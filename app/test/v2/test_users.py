@@ -19,7 +19,7 @@ class TestUser(BaseTest):
             headers=self.general_header)
         self.assertEqual(
             response.json[
-                'Message'], "User 'heSbon52' successfully registered as 'admin")
+                'message'], "User 'heSbon52' successfully registered as 'admin")
 
         self.assertEqual(response.status_code, 201)
 
@@ -39,7 +39,7 @@ class TestUser(BaseTest):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
             response.json[
-                'Message'], "User 'hesbon2' successfully registered as 'attendant")
+                'message'], "User 'hesbon2' successfully registered as 'attendant")
 
     def test_existing_username(self):
         '''An existing username cannot be used'''
@@ -243,4 +243,4 @@ class TestUser(BaseTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
-                         'Message'], "Successfully logged in as 'attendant")
+                         'message'], "Successfully logged in")

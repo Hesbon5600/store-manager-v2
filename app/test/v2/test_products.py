@@ -10,16 +10,16 @@ class TestProducts(BaseTest):
             "title": "omo",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": 2
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
             headers=self.admin_header)
         self.assertEqual(response.json[
-                         'Message'], "Product created Successfully")
+                         'message'], "Product created Successfully")
         self.assertEqual(response.status_code, 201)
 
     def test_attendant_create_product(self):
@@ -28,9 +28,9 @@ class TestProducts(BaseTest):
             "/api/v2/products",
             data=self.product,
             headers=self.attendant_header)
-        self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json[
-                         'Message'], "You must be an admin")
+                         'message'], "You must be an admin")
+        self.assertEqual(response.status_code, 401)
 
     def test_get_all_products(self):
         '''User can get all products'''
@@ -38,7 +38,7 @@ class TestProducts(BaseTest):
             '/api/v2/products', headers=self.attendant_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
-                         'Message'], "Successfully fetched all products")
+                         'message'], "Successfully fetched all products")
 
     def test_get_all_products_no_token(self):
         '''User cannot get products if not logged in'''
@@ -46,17 +46,17 @@ class TestProducts(BaseTest):
             '/api/v2/products')
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json[
-                         'Message'], "Token is invalid")
+                         'message'], "Token is invalid")
 
     def test_description_not_string(self):
         '''Description of the products must be a string'''
         product = json.dumps({
             "title": "Kiwi",
             "category": "toilateries",
-            "description": 78768,
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": 2
+            "description": 5656,
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -70,11 +70,11 @@ class TestProducts(BaseTest):
         '''Category of the products must be a string'''
         product = json.dumps({
             "title": "520",
-            "category": 65654,
+            "category": 6516,
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": 2
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -82,7 +82,7 @@ class TestProducts(BaseTest):
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
-                         'message'], "65654 is not of type 'string'")
+                         'message'], "6516 is not of type 'string'")
 
     def test_quantity_not_int(self):
         '''Quantity of the products must be a whole number'''
@@ -90,9 +90,9 @@ class TestProducts(BaseTest):
             "title": "520",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": "500"
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "50ojo0"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -100,25 +100,7 @@ class TestProducts(BaseTest):
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
-                         'message'], "'500' is not of type 'integer'")
-
-    def test_price_not_float(self):
-        '''Price of the products must be a float'''
-        product = json.dumps({
-            "title": "520",
-            "category": "toilateries",
-            "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20,
-            "quantity": 2
-        })
-        response = self.test_client.post(
-            "/api/v2/products",
-            data=product,
-            headers=self.admin_header)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json[
-                         'message'], "Product price must be of the format 00.00")
+                         'message'], "Product quantity must be anumber")
 
     def test_inventory_not_int(self):
         '''Lower inventory of the products must be an integer'''
@@ -126,17 +108,17 @@ class TestProducts(BaseTest):
             "title": "520",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 45.50,
-            "price": 20.00,
-            "quantity": 2
+            "lower_inventory": "45.50",
+            "price": "20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
             data=product,
             headers=self.admin_header)
-        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json[
-                         'message'], "45.5 is not of type 'integer'")
+                         'message'], "Product Lower inventory must be anumber")
+        self.assertEqual(response.status_code, 400)
 
     def test_quantity_less_than_zero(self):
         '''Quantity of the products must be more than zero'''
@@ -144,9 +126,9 @@ class TestProducts(BaseTest):
             "title": "dhc",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": -2
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "-2"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -162,9 +144,9 @@ class TestProducts(BaseTest):
             "title": "520",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": -1,
-            "price": 20.00,
-            "quantity": 2
+            "lower_inventory": "-1",
+            "price": "20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -180,9 +162,9 @@ class TestProducts(BaseTest):
             "title": "hghgvh",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": -20.00,
-            "quantity": 2
+            "lower_inventory": "1",
+            "price": "-20.00",
+            "quantity": "2"
         })
         response = self.test_client.post(
             "/api/v2/products",
@@ -199,7 +181,7 @@ class TestProducts(BaseTest):
             headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
-                         'Message'], "Successfully fetched one product")
+                         'message'], "Successfully fetched one product")
 
     def test_delete_a_products(self):
         '''Admin can delete a product'''
@@ -207,4 +189,4 @@ class TestProducts(BaseTest):
             '/api/v2/products/1', headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json[
-                         'Message'], "Product deleted Successfully")
+                         'message'], "Product deleted Successfully")

@@ -87,20 +87,32 @@ class ValidateProduct():
                 abort(406, message)
 
     def validate_product_details(self):
-        if self.quantity < 0:
+        try:
+            price = float(self.price)
+        except:
+            message = "Product price must be of the format 00.00"
+            abort(400, message)
+        try:
+            lower_inventory = int(self.lower_inventory)
+        except:
+            message = "Product Lower inventory must be anumber"
+            abort(400, message)
+        try:
+            quantity = int(self.quantity)
+        except:
+            message = "Product quantity must be anumber"
+            abort(400, message)
+
+        if float(self.price) < 0:
+            message = "Product price should be greater than 0"
+            abort(400, message)
+        if int(self.quantity) < 0:
             message = "Product Quantity should be a positive value value"
             abort(400, message)
 
-        if type(self.price) != float:
-            message = "Product price must be of the format 00.00"
-            abort(400, message)
-        if self.price < 0:
-            message = "Product price should be greater than 0"
-            abort(400, message)
-
-        if self.lower_inventory < 0:
+        if int(self.lower_inventory) < 0:
             message = "Product price should be value greater than 0"
             abort(400, message)
-        if self.lower_inventory > self.quantity:
+        if int(self.lower_inventory) > int(self.quantity):
             message = "Lower inventory should be less than the quantity"
             abort(400, message)

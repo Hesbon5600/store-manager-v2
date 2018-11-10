@@ -46,14 +46,14 @@ class BaseTest(unittest.TestCase):
             "title": "omoo",
             "category": "toilateries",
             "description": "description for omo",
-            "lower_inventory": 1,
-            "price": 20.00,
-            "quantity": 3
+            "lower_inventory": "1",
+            "price": "20.00",
+            "quantity": "3"
         })
         # Sale detail
         self.sale = json.dumps({
             "product_title": "omoo",
-            "product_quantity": 1
+            "product_quantity": "1"
         })
         self.general_header = {
                 'content-type': 'application/json'

@@ -4,11 +4,11 @@ PRODUCT_JSON = {
     'maxProperties': 6,
     'properties': {
         'title': {'type': 'string'},
-        'quantity': {'type': 'integer'},
+        'quantity': {'type': 'string'},
         'description': {'type': 'string'},
         'category': {'type': 'string'},
-        'price': {'type': 'number'},
-        'lower_inventory': {'type': 'integer'},
+        'price': {'type': 'string'},
+        'lower_inventory': {'type': 'string'},
     },
     'required': ['title', 'price', 'description',
                  'category', 'quantity', 'lower_inventory']
@@ -41,7 +41,7 @@ SALE_JSON = {
     'maxProperties': 2,
     'properties': {
         'product_title': {'type': 'string'},
-        'product_quantity': {'type': 'integer'}
+        'product_quantity': {'type': 'string'}
     },
     'required': ['product_title', 'product_quantity']
 }
