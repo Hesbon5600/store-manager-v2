@@ -48,7 +48,7 @@ https://documenter.getpostman.com/view/4074074/RzZ1qN7c
 	1. for the application run  
 	`$ flask run`  
 
-#Testing with postman
+# Testing with postman
 If you ran the application you can test the various api end points using postman. The appi endpoints are  
 
 |Endpoint|functionality|contraints(requirements)|
@@ -65,5 +65,5 @@ If you ran the application you can test the various api end points using postman
 |`put /api/v2/products/<productID>` | update a products|product id, product data, pass token|
 
 
-#Acknowledgement
+# Acknowledgement
 I would like to acknowledge Andela for facilitating this project
