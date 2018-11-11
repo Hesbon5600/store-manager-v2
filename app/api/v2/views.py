@@ -137,14 +137,8 @@ class Logout(Resource):
 
 class GetUsers(Resource):
     '''Get all users'''
-    @token_required
-    def get(current_user, self):
+    def get(self):
         '''Get all users from the database'''
-        if current_user and current_user['role'] != "admin":
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be an admin"
-            }), 401)
         self.user_obj = User.get_all_users(self)
         return make_response(jsonify({
                 'Status': 'Ok',
@@ -401,10 +395,10 @@ class Sale(Resource):
     @token_required
     def get(current_user, self):
         '''Admin can get all sales'''
-        if current_user and current_user['role'] != "admin":
+        if not current_user:
             return make_response(jsonify({
                 'Status': 'Failed',
-                'message': "You must be logged in as an admin"
+                'message': "You must be logged in first"
             }), 403)
         self.sale_obj = PostSale.get_all_sales(self)
         if len(self.sale_obj) > 0:

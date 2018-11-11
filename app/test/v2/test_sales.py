@@ -58,7 +58,7 @@ class TestSales(BaseTest):
     def test_attendant_get_all_sales(self):
         '''Attendant cannot get all sales'''
         response = self.test_client.get('/api/v2/sales', headers=self.attendant_header)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
     def test_admin_get_single_sale(self):
         '''Admin can get a single sale'''
