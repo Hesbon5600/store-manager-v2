@@ -340,7 +340,7 @@ class Sale(Resource):
                                          'message': "You must be an attendant"
                                          }), 403)
         product_title = data['product_title']
-        product_quantity = data['product_quantity']
+        product_quantity = int(data['product_quantity'])
         # product_quantity
         if int(product_quantity) < 0:
             return make_response(jsonify({
