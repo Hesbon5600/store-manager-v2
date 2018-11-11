@@ -137,14 +137,15 @@ class Logout(Resource):
 
 class GetUsers(Resource):
     '''Get all users'''
+
     def get(self):
         '''Get all users from the database'''
         self.user_obj = User.get_all_users(self)
         return make_response(jsonify({
-                'Status': 'Ok',
-                'message': "Successfully fetched all users",
-                'users': self.user_obj
-            }), 200)
+            'Status': 'Ok',
+            'message': "Successfully fetched all users",
+            'users': self.user_obj
+        }), 200)
 
 
 class PromoteUser(Resource):
@@ -278,7 +279,8 @@ class SingleProduct(Resource):
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
                 if int(product['product_id']) != int(product_id) and product['title'].lower() == data['title'].lower():
-                    message = "Product: '" + product['title'] + "' already exists"
+                    message = "Product: '" + \
+                        product['title'] + "' already exists"
                     abort(406, message)
                 if int(product['product_id']) == int(product_id):
                     new_prod = PostProduct(data)
@@ -339,24 +341,34 @@ class Sale(Resource):
                                          'Status': 'Failed',
                                          'message': "You must be an attendant"
                                          }), 403)
-        product_title = data['product_title']
+        try:
+            product_quantity = int(data['product_quantity'])
+        except:
+            return make_response(jsonify({
+                                         'Status': 'Failed',
+                                         'message': "You must enter a product quantity"
+                                         }), 403)
+
+        product_title = data['product_title'].strip()
         product_quantity = int(data['product_quantity'])
+        print(product_quantity)
         # product_quantity
         if int(product_quantity) < 0:
             return make_response(jsonify({
-                        'Status': 'Failed',
-                        'message': "Product quantity must be more than 0"
-                    }), 403)
+                'Status': 'Failed',
+                'message': "Product quantity must be more than 0"
+            }), 403)
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
-            if product['title'].lower() == data['product_title'].lower() \
+            print(product['title'].lower(), product_title.lower())
+            if product['title'].lower() == product_title.lower() \
                     and int(product['quantity']) < 1:
                 return make_response(jsonify({
                     'Status': 'Failed',
                     'message': "No more products to sell"
                 }), 404)
 
-            if product['title'].lower() == product_title:
+            if product['title'].lower() == product_title.lower():
                 if int(product['quantity']) < int(product_quantity):
                     return make_response(jsonify({
                         'Status': 'Failed',
@@ -373,7 +385,8 @@ class Sale(Resource):
                 }
                 post_sale = PostSale(new_sale)
                 post_sale.save_sale()
-                product['quantity'] = int(product['quantity']) - int(product_quantity)
+                product['quantity'] = int(
+                    product['quantity']) - int(product_quantity)
                 product_id = product_id
                 update_prod = PostProduct()
                 update_prod.update_sold_product(product, product_id)
