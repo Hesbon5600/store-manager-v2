@@ -353,7 +353,7 @@ class Sale(Resource):
         product_quantity = int(data['product_quantity'])
         print(product_quantity)
         # product_quantity
-        if int(product_quantity) < 0:
+        if int(product_quantity) < 1:
             return make_response(jsonify({
                 'Status': 'Failed',
                 'message': "Product quantity must be more than 0"
