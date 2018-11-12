@@ -10,6 +10,7 @@ from .models.usermodels import User
 import datetime
 from instance.config import app_config
 from .tokenrequired import token_required
+from .restrict import Restrict
 
 
 class UserRegistration(Resource):
@@ -26,7 +27,10 @@ class UserRegistration(Resource):
             }), 400)
 
         validate = ValidateUser(data)
-        validate.validate_user_details()
+        validate.validate_missing_user_details()
+        validate.validate_user_imput_types()
+        validate.validate_duplicate_data()
+        validate.validate_password()
         user = User(data)
         user.save_user()
         self.user_obj = User.get_all_users(self)
@@ -86,7 +90,7 @@ class Logout(Resource):
                 'message': 'You are not logged in'
             }), 401)
         user_obj = User()
-        users = user_obj.get_all_users()
+        users = user_obj.get_all_users(self)
         token = None
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
@@ -116,6 +120,11 @@ class GetUsers(Resource):
 
 class PromoteUser(Resource):
     '''Make an attendant to be an admin'''
+
+    def __init__(self):
+        restrict = Restrict()
+        self.admin_only = restrict.admin_only
+
     @token_required
     def put(current_user, self, user_id):
         '''Takes the user_id and updates the role to admin'''
@@ -124,10 +133,7 @@ class PromoteUser(Resource):
         self.user_obj = User.get_all_users(self)
         # data = request.get_json()
         if current_user and current_user['role'] != "admin":
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be an admin"
-            }), 401)
+            return self.admin_only
         for user in self.user_obj:
             if int(user['user_id']) == int(self.user_id):
                 if user['role'] == 'admin':

@@ -7,10 +7,19 @@ from .expected_json import SALE_JSON
 from .models.salemodels import PostSale
 from .models.productmodels import PostProduct
 from .tokenrequired import token_required
+from .restrict import Restrict
 
 
 class Sale(Resource):
     '''Post and get sales'''
+
+    def __init__(self):
+        restrict = Restrict()
+        self.admin_only = restrict.admin_only
+        self.login_first = restrict.login_first
+        self.no_such_product = restrict.no_such_product
+        self.attendant_only = restrict.attendant_only
+
     @token_required
     @expects_json(SALE_JSON)
     def post(current_user, self):
@@ -18,10 +27,7 @@ class Sale(Resource):
         total = 0
         data = request.get_json()
         if current_user and current_user['role'] != 'attendant':
-            return make_response(jsonify({
-                                         'Status': 'Failed',
-                                         'message': "You must be an attendant"
-                                         }), 403)
+            return self.attendant_only
         try:
             product_quantity = int(data['product_quantity'])
         except:
@@ -82,20 +88,14 @@ class Sale(Resource):
                             'Remaining products': product,
                             'Total': total
                         }), 201)
-        return make_response(jsonify({
-            'Status': 'Failed',
-            'message': "product does not exist"
-        }), 404)
+        return self.no_such_product
 
     # Get all sale entries
     @token_required
     def get(current_user, self):
         '''Admin can get all sales'''
         if not current_user:
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be logged in first"
-            }), 403)
+            return self.login_first
         self.sale_obj = PostSale.get_all_sales(self)
         if len(self.sale_obj) > 0:
             response = make_response(jsonify({
@@ -120,7 +120,7 @@ class SingleSale(Resource):
         self.sale_obj = PostSale.get_all_sales(self)
         for sale in self.sale_obj:
             if current_user['role'] == 'admin' or \
-             current_user['user_id'] == sale['attendant_id']:
+                    current_user['user_id'] == sale['attendant_id']:
                 if int(sale_id) == sale['sale_id']:
                     return make_response(jsonify({
                         'Status': 'Ok',
@@ -130,7 +130,7 @@ class SingleSale(Resource):
             else:
                 return make_response(jsonify({
                     'Status': 'Failed',
-                    'message': "You cannor access this sale record"
+                    'message': "You cannot access this sale record"
                 }), 401)
         else:
             return make_response(jsonify({

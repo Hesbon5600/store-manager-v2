@@ -7,6 +7,7 @@ from .models.productmodels import PostProduct
 
 class ValidateProduct(PostProduct):
     ''' Handles Product validation  '''
+
     def __init__(self, data):
         self.title = data['title']
         self.category = data['category']
@@ -24,7 +25,7 @@ class ValidateProduct(PostProduct):
                 message = "Product: '" + self.title + "' already exists"
                 abort(406, message)
 
-    def validate_product_details(self):
+    def validate_product_data_types(self):
         '''More validations for the product'''
         try:
             price = float(self.price)
@@ -42,6 +43,7 @@ class ValidateProduct(PostProduct):
             message = "Product quantity must be anumber"
             abort(400, message)
 
+    def validate_product_values(self):
         if float(self.price) < 0:
             message = "Product price should be greater than 0"
             abort(400, message)

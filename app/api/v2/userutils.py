@@ -7,13 +7,14 @@ from .models.usermodels import User
 
 class ValidateUser(User):
     ''' Class that handles validating users input '''
+
     def __init__(self, data):
         self.username = data['username'].strip()
         self.email = data['email'].strip()
         self.password = data['password'].strip()
         self.role = data['role'].strip()
 
-    def validate_user_details(self):
+    def validate_missing_user_details(self):
         ''' Check the input and eturn a message if an error is thrown '''
         self.user_obj = User.get_all_users(self)
         if not validate_email(self.email):
@@ -31,6 +32,8 @@ class ValidateUser(User):
         if self.role == "":
             message = "Role is missing"
             abort(400, message)
+
+    def validate_duplicate_data(self):
         for user in self.user_obj:
             if self.username.lower() == user["username"].lower():
                 message = "Username '" + self.username + "' already taken"
@@ -38,6 +41,8 @@ class ValidateUser(User):
             if self.email == user["email"]:
                 message = "Email '" + self.email + "' already taken"
                 abort(406, message)
+
+    def validate_user_imput_types(self):
         if type(self.username) != str:
             message = "Username must be a string"
             abort(400, message)
@@ -50,6 +55,8 @@ class ValidateUser(User):
         if type(self.role) != str:
             message = "Role must be a string"
             abort(400, message)
+
+    def validate_password(self):
         if len(self.password) <= 6 or len(self.password) > 12:
             message = "Password must be at least 6 and at most 10 ch long"
             abort(400, message)

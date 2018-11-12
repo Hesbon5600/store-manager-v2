@@ -6,21 +6,26 @@ from .expected_json import PRODUCT_JSON
 from .productutils import ValidateProduct
 from .models.productmodels import PostProduct
 from .tokenrequired import token_required
+from .restrict import Restrict
 
 
 class Product(Resource):
     '''Deals with posting a product and\
     returning the products from db'''
+
+    def __init__(self):
+        restrict = Restrict()
+        self.admin_only = restrict.admin_only
+        self.login_first = restrict.login_first
+        self.no_such_product = restrict.no_such_product
     # Get all products
+
     @token_required
     def get(current_user, self):
         '''Function to return the saved users from the database'''
         self.prod_obj = PostProduct.get_all_products(self)
         if not current_user:
-            response = make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must first login"
-            }), 401)
+            response = self.login_first
         if len(self.prod_obj) < 1:
             response = make_response(jsonify({
                 'Status': 'Failed',
@@ -41,14 +46,11 @@ class Product(Resource):
         '''Take the product data and save it in a database'''
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be an admin"
-            }), 401)
+            return self.admin_only
         if current_user and current_user['role'] == "admin":
             valid_product = ValidateProduct(data)
-            valid_product.validate_duplicates()
-            valid_product.validate_product_details()
+            valid_product.validate_product_data_types()
+            valid_product.validate_product_values()
             product = PostProduct(data)
             product.save_product()
 
@@ -70,10 +72,7 @@ class SingleProduct(Resource):
         product that matches it from the DB'''
         self.prod_obj = PostProduct.get_all_products(self)
         if not current_user:
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be logged in first"
-            }), 401)
+            return self.login_first
         for product in self.prod_obj:
             if product['product_id'] == int(product_id):
                 return make_response(jsonify({
@@ -82,10 +81,7 @@ class SingleProduct(Resource):
                     'Product': product
                 }), 200)
 
-        return make_response(jsonify({
-            'Status': 'Failed',
-            'message': "No such product"
-        }), 404)
+        return self.no_such_product
 
     @token_required
     @expects_json(PRODUCT_JSON)
@@ -94,13 +90,11 @@ class SingleProduct(Resource):
         self.product_Id = int(product_id)
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be an admin"
-            }), 401)
+            return self.admin_only
         if current_user and current_user['role'] == "admin":
             valid_product = ValidateProduct(data)
-            valid_product.validate_product_details()
+            valid_product.validate_product_data_types()
+            valid_product.validate_product_values()
             self.prod_obj = PostProduct.get_all_products(self)
             for product in self.prod_obj:
                 if int(product['product_id']) != int(product_id)\
@@ -119,20 +113,14 @@ class SingleProduct(Resource):
                                 'message': "Product updated Successfully",
                                 'Product': product
                             }), 201)
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "No such product"
-            }), 404)
+            return self.no_such_product
 
     @token_required
     def delete(current_user, self, product_id):
         '''Delete a specific product'''
         self.product_Id = int(product_id)
         if current_user and current_user['role'] != "admin":
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "You must be an admin"
-            }), 401)
+            return self.admin_only
         if current_user and current_user['role'] == "admin":
             self.prod_obj = PostProduct.get_all_products(self)
             if len(self.prod_obj) < 1:
@@ -148,7 +136,4 @@ class SingleProduct(Resource):
                         'Status': 'Ok',
                         'message': "Product deleted Successfully"
                     }), 200)
-            return make_response(jsonify({
-                'Status': 'Failed',
-                'message': "No such product"
-            }), 404)
+            return self.no_such_product
