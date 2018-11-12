@@ -23,7 +23,6 @@ def token_required(func):
             return make_response(jsonify({
                 'message': 'You are logged out You must login again'
             }), 401)
-        print(invalid_token)
         try:
             data = jwt.decode(
                 token, app_config['development'].SECRET_KEY,

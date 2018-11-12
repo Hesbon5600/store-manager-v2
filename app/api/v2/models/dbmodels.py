@@ -95,3 +95,4 @@ class Dtb():
             cur.execute(query)
         self.conn.commit()
         self.conn.close()
+

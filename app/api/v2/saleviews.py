@@ -39,7 +39,6 @@ class Sale(Resource):
 
         product_title = data['product_title'].strip()
         product_quantity = int(data['product_quantity'])
-        print(product_quantity)
         # product_quantity
         if int(product_quantity) < 1:
             return make_response(jsonify({
@@ -48,7 +47,6 @@ class Sale(Resource):
             }), 403)
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
-            print(product['title'].lower(), product_title.lower())
             if product['title'].lower() == product_title.lower() \
                     and int(product['quantity']) < 1:
                 return make_response(jsonify({
