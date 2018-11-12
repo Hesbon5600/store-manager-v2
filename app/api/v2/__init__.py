@@ -1,8 +1,10 @@
 '''Defining the blueprint and the access routes'''
 from flask import Blueprint
 from flask_restful import Api
-from .views import Sale, UserRegistration, UserLogin, Logout, GetUsers
-from .views import Product, SingleProduct, SingleSale, PromoteUser
+from .userviews import UserRegistration, UserLogin
+from .userviews import Logout, GetUsers, PromoteUser
+from .saleviews import Sale, SingleSale
+from .productviews import Product, SingleProduct
 v2 = Blueprint('api', __name__, url_prefix='/api/v2')
 
 api = Api(v2)
@@ -16,4 +18,3 @@ api.add_resource(Sale, '/sales')
 api.add_resource(SingleSale, '/sales/<sale_id>')
 api.add_resource(PromoteUser, '/users/<user_id>')
 api.add_resource(GetUsers, '/users')
-

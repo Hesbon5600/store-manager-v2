@@ -1,7 +1,7 @@
 '''Module for the sutup and teardown'''
 import unittest
 import json
-from app.api.v2.models import *
+from app.api.v2.models.dbmodels import Dtb
 from app import create_app
 from instance.config import app_config
 

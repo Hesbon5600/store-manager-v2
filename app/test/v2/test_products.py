@@ -117,7 +117,7 @@ class TestProducts(BaseTest):
             data=product,
             headers=self.admin_header)
         self.assertEqual(response.json[
-                         'message'], "Product Lower inventory must be anumber")
+                         'message'], "Product Lower inventory must be whole number")
         self.assertEqual(response.status_code, 400)
 
     def test_quantity_less_than_zero(self):
