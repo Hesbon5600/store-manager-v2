@@ -71,14 +71,10 @@ class User(Dtb):
 
     def get_invalid_tokens(self, token):
         '''Retrieve all users'''
-        db_obj = Dtb()
-        self.conn = db_obj.connection()
-        cur = self.conn.cursor()
-
-        cur.execute("""SELECT * FROM token_blacklist WHERE\
+        self.cur.execute("""SELECT * FROM token_blacklist WHERE\
          invalid_token = %s""",
-                    (token,),)
-        result = cur.fetchone()
+                         (token,),)
+        result = self.cur.fetchone()
         if result:
             return True
         self.conn.close()
