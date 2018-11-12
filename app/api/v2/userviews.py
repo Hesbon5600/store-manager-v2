@@ -90,7 +90,7 @@ class Logout(Resource):
                 'message': 'You are not logged in'
             }), 401)
         user_obj = User()
-        users = user_obj.get_all_users(self)
+        users = user_obj.get_all_users()
         token = None
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']

@@ -29,11 +29,10 @@ class User(Dtb):
 
     def get_all_users(self):
         '''Retrieve all users'''
-        db_obj = Dtb()
-        self.conn = db_obj.connection()
-        cur = self.conn.cursor()
-        cur.execute("SELECT * FROM users")
-        result = cur.fetchall()
+        self.conn = Dtb().connection()
+        curr = self.conn.cursor()
+        curr.execute("SELECT * FROM users")
+        result = curr.fetchall()
         users = []
         for user in result:
             single_user = {}
@@ -49,12 +48,7 @@ class User(Dtb):
 
     def update_user(self, user_id):
         '''Update user role to admin'''
-        db_obj = Dtb()
-        self.role = 'admin'
-        self.user_id = user_id
-        self.conn = db_obj.connection()
-        cur = self.conn.cursor()
-        cur.execute(
+        self.cur.execute(
             """UPDATE users SET role = %s WHERE user_id = %s""",
             (self.role, self.user_id),
         )
@@ -63,11 +57,8 @@ class User(Dtb):
         self.conn.close()
 
     def logout(self, token):
-        db_obj = Dtb()
-        self.conn = db_obj.connection()
-        cur = self.conn.cursor()
         try:
-            cur.execute(
+            self.cur.execute(
                 "INSERT INTO token_blacklist (invalid_token)\
              VALUES (%s)",
                 (token,),
