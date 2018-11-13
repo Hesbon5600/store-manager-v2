@@ -9,12 +9,12 @@ class ValidateProduct(PostProduct):
     ''' Handles Product validation  '''
 
     def __init__(self, product):
-        self.title = product['title']
         self.category = product['category']
-        self.description = product['description']
-        self.quantity = product['quantity']
         self.price = product['price']
+        self.title = product['title']
         self.lower_inventory = product['lower_inventory']
+        self.quantity = product['quantity']
+        self.description = product['description']
 
     def validate_duplicates(self):
         '''Ensure no product shares a name with another product.'''
