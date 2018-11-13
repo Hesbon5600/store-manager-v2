@@ -1,19 +1,13 @@
 '''This module handles products in the database'''
 from .dbmodels import Dtb
+from ..views.productinput import ProductInput
 
 
-class PostProduct(Dtb):
+class PostProduct(ProductInput):
     '''Save, get, and update products'''
 
     def __init__(self, data=None):
-        '''Get the product data'''
-        if data:
-            self.title = data['title']
-            self.category = data['category']
-            self.description = data['description']
-            self.quantity = data['quantity']
-            self.price = data['price']
-            self.lower_inventory = data['lower_inventory']
+        super().__init__(data)
 
     def save_product(self):
         '''Insert the product data in the database'''

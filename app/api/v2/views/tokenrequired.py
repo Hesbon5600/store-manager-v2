@@ -3,7 +3,7 @@ from instance.config import app_config
 from flask import Flask, jsonify, make_response, request
 from functools import wraps
 import jwt
-from .models.usermodels import User
+from ..models.usermodels import User
 
 
 def token_required(func):

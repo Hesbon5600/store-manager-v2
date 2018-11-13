@@ -2,7 +2,7 @@
 import re
 from validate_email import validate_email
 from flask import make_response, jsonify, abort
-from .models.usermodels import User
+from ..models.usermodels import User
 
 
 class ValidateUser(User):

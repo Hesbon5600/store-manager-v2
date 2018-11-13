@@ -2,23 +2,20 @@
 import re
 from validate_email import validate_email
 from flask import make_response, jsonify, abort
-from .models.productmodels import PostProduct
+from ..models.productmodels import PostProduct
+from .productinput import ProductInput
 
 
-class ValidateProduct(PostProduct):
+class ValidateProduct(ProductInput):
     ''' Handles Product validation  '''
 
-    def __init__(self, product):
-        self.category = product['category']
-        self.price = product['price']
-        self.title = product['title']
-        self.lower_inventory = product['lower_inventory']
-        self.quantity = product['quantity']
-        self.description = product['description']
+    def __init__(self, data):
+        super().__init__(data)
 
     def validate_duplicates(self):
         '''Ensure no product shares a name with another product.'''
         '''Not called when updating a product'''
+        print(self.price)
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
             if product['title'].lower() == self.title.lower():
@@ -27,6 +24,7 @@ class ValidateProduct(PostProduct):
 
     def validate_product_data_types(self):
         '''More validations for the product'''
+        # print(self.price)
         try:
             price = float(self.price)
         except:

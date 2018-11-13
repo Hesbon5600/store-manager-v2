@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from flask_expects_json import expects_json
 from .expected_json import USER_LOGIN_JSON, USER_REGISTRATION_JSON
 from .userutils import ValidateUser
-from .models.usermodels import User
+from ..models.usermodels import User
 import datetime
 from instance.config import app_config
 from .tokenrequired import token_required

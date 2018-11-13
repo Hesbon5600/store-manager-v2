@@ -1,10 +1,10 @@
 '''Defining the blueprint and the access routes'''
 from flask import Blueprint
 from flask_restful import Api
-from .userviews import UserRegistration, UserLogin
-from .userviews import Logout, GetUsers, PromoteUser
-from .saleviews import Sale, SingleSale
-from .productviews import Product, SingleProduct
+from .views.userviews import UserRegistration, UserLogin
+from .views.userviews import Logout, GetUsers, PromoteUser
+from .views.saleviews import Sale, SingleSale
+from .views.productviews import Product, SingleProduct
 v2 = Blueprint('api', __name__, url_prefix='/api/v2')
 
 api = Api(v2)

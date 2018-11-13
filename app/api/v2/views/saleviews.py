@@ -4,8 +4,8 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 from flask_expects_json import expects_json
 from .expected_json import SALE_JSON
-from .models.salemodels import PostSale
-from .models.productmodels import PostProduct
+from ..models.salemodels import PostSale
+from ..models.productmodels import PostProduct
 from .tokenrequired import token_required
 from .restrict import Restrict
 

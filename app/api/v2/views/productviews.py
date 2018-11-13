@@ -4,9 +4,10 @@ from flask_restful import Resource
 from flask_expects_json import expects_json
 from .expected_json import PRODUCT_JSON
 from .productutils import ValidateProduct
-from .models.productmodels import PostProduct
+from ..models.productmodels import PostProduct
 from .tokenrequired import token_required
 from .restrict import Restrict
+from .productinput import ProductInput
 
 
 class Product(Resource):
@@ -51,6 +52,7 @@ class Product(Resource):
             valid_product = ValidateProduct(data)
             valid_product.validate_product_data_types()
             valid_product.validate_product_values()
+            valid_product.validate_duplicates()
             product = PostProduct(data)
             product.save_product()
 
@@ -66,6 +68,13 @@ class Product(Resource):
 
 class SingleProduct(Resource):
     '''Get a single product from the DB'''
+
+    def __init__(self):
+        restrict = Restrict()
+        self.admin_only = restrict.admin_only
+        self.login_first = restrict.login_first
+        self.no_such_product = restrict.no_such_product
+
     @token_required
     def get(current_user, self, product_id):
         '''Given the product ID select a\
