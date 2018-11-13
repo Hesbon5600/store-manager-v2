@@ -10,16 +10,8 @@ from .tokenrequired import token_required
 from .restrict import Restrict
 
 
-class Sale(Resource):
+class Sale(Resource, Restrict):
     '''Post and get sales'''
-
-    def __init__(self):
-        restrict = Restrict()
-        self.admin_only = restrict.admin_only
-        self.login_first = restrict.login_first
-        self.no_such_product = restrict.no_such_product
-        self.attendant_only = restrict.attendant_only
-
     @token_required
     @expects_json(SALE_JSON)
     def post(current_user, self):

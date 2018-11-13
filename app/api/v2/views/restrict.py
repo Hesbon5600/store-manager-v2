@@ -3,7 +3,7 @@ for for validation'''
 from flask import jsonify, make_response, request
 
 
-class Restrict(object):
+class Restrict():
     ''''Declare the commor return messages'''
     def __init__(self):
         '''Initialize the response messages'''

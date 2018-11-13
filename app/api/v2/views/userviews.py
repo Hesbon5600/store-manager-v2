@@ -119,13 +119,8 @@ class GetUsers(Resource):
         }), 200)
 
 
-class PromoteUser(Resource):
+class PromoteUser(Resource, Restrict):
     '''Make an attendant to be an admin'''
-
-    def __init__(self):
-        restrict = Restrict()
-        self.admin_only = restrict.admin_only
-
     @token_required
     def put(current_user, self, user_id):
         '''Takes the user_id and updates the role to admin'''

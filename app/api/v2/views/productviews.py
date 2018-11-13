@@ -1,5 +1,5 @@
 '''Handles all functionality of routing product requests'''
-from flask import jsonify, make_response, request
+from flask import jsonify, make_response, request, abort
 from flask_restful import Resource
 from flask_expects_json import expects_json
 from .expected_json import PRODUCT_JSON
@@ -10,17 +10,9 @@ from .restrict import Restrict
 from .productinput import ProductInput
 
 
-class Product(Resource):
+class Product(Resource, Restrict):
     '''Deals with posting a product and\
     returning the products from db'''
-
-    def __init__(self):
-        restrict = Restrict()
-        self.admin_only = restrict.admin_only
-        self.login_first = restrict.login_first
-        self.no_such_product = restrict.no_such_product
-    # Get all products
-
     @token_required
     def get(current_user, self):
         '''Function to return the saved users from the database'''
@@ -65,15 +57,8 @@ class Product(Resource):
                 }), 201)
 
 
-class SingleProduct(Resource):
+class SingleProduct(Resource, Restrict):
     '''Get a single product from the DB'''
-
-    def __init__(self):
-        restrict = Restrict()
-        self.admin_only = restrict.admin_only
-        self.login_first = restrict.login_first
-        self.no_such_product = restrict.no_such_product
-
     @token_required
     def get(current_user, self, product_id):
         '''Given the product ID select a\
