@@ -69,6 +69,8 @@ class ValidateUser(User):
         elif not any(char.islower() for char in self.password):
             message = "Password must have a lower case character"
             abort(400, message)
-        elif not re.search("[#@$]", self.password):
+
+    def validate_special_character(self):
+        if not re.search("[#@$]", self.password):
             message = "Password must have one of the special charater [#@$]"
             abort(400, message)

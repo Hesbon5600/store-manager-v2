@@ -31,6 +31,7 @@ class UserRegistration(Resource):
         validate.validate_user_imput_types()
         validate.validate_duplicate_data()
         validate.validate_password()
+        validate.validate_special_character()
         user = User(data)
         user.save_user()
         self.user_obj = User.get_all_users(self)
