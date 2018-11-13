@@ -8,13 +8,13 @@ from .models.productmodels import PostProduct
 class ValidateProduct(PostProduct):
     ''' Handles Product validation  '''
 
-    def __init__(self, data):
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
+    def __init__(self, product):
+        self.title = product['title']
+        self.category = product['category']
+        self.description = product['description']
+        self.quantity = product['quantity']
+        self.price = product['price']
+        self.lower_inventory = product['lower_inventory']
 
     def validate_duplicates(self):
         '''Ensure no product shares a name with another product.'''

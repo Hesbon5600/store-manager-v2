@@ -4,6 +4,7 @@ from .base_test import *
 
 class TestProducts(BaseTest):
     '''Tests for the products '''
+
     def test_admin_create_product(self):
         '''Admin can create a product '''
         product = json.dumps({
