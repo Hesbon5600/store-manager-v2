@@ -1,6 +1,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c3b6ff6f490b4da898e2b81140daf1f6)](https://app.codacy.com/app/Hesbon5600/store-manager-v2?utm_source=github.com&utm_medium=referral&utm_content=Hesbon5600/store-manager-v2&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/Hesbon5600/store-manager-v2.svg?branch=develop)](https://travis-ci.org/Hesbon5600/store-manager-v2)
+[![Maintainability](https://api.codeclimate.com/v1/badges/ea9c72b259e0ddb799ff/maintainability)](https://codeclimate.com/github/Hesbon5600/store-manager-v2/maintainability)
 [![Coverage Status](https://coveralls.io/repos/github/Hesbon5600/store-manager-v2/badge.svg?branch=bg-fixing-bugs-v2-161576896)](https://coveralls.io/github/Hesbon5600/store-manager-v2?branch=bg-fixing-bugs-v2-161576896)  
 
 # store-manager-v2
