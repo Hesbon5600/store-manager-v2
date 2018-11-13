@@ -48,22 +48,21 @@ class Product(Resource):
         data = request.get_json()
         if current_user and current_user['role'] != "admin":
             return self.admin_only
-        if current_user and current_user['role'] == "admin":
-            valid_product = ValidateProduct(data)
-            valid_product.validate_product_data_types()
-            valid_product.validate_product_values()
-            valid_product.validate_duplicates()
-            product = PostProduct(data)
-            product.save_product()
+        valid_product = ValidateProduct(data)
+        valid_product.validate_product_data_types()
+        valid_product.validate_product_values()
+        valid_product.validate_duplicates()
+        product = PostProduct(data)
+        product.save_product()
 
-            self.prod_obj = PostProduct.get_all_products(self)
-            for product in self.prod_obj:
-                if product['title'] == data['title']:
-                    return make_response(jsonify({
-                        'Status': 'Ok',
-                        'message': "Product created Successfully",
-                        'My Products': product
-                    }), 201)
+        self.prod_obj = PostProduct.get_all_products(self)
+        for product in self.prod_obj:
+            if product['title'] == data['title']:
+                return make_response(jsonify({
+                    'Status': 'Ok',
+                    'message': "Product created Successfully",
+                    'My Products': product
+                }), 201)
 
 
 class SingleProduct(Resource):
