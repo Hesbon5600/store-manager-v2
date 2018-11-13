@@ -117,8 +117,9 @@ class TestProducts(BaseTest):
             "/api/v2/products",
             data=product,
             headers=self.admin_header)
-        self.assertEqual(response.json[
-                         'message'], "Product Lower inventory must be whole number")
+        self.assertEqual(
+            response.json[
+                'message'], "Product Lower inventory must be whole number")
         self.assertEqual(response.status_code, 400)
 
     def test_quantity_less_than_zero(self):
@@ -136,8 +137,9 @@ class TestProducts(BaseTest):
             data=product,
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json[
-                         'message'], "Product Quantity should be a positive value value")
+        self.assertEqual(
+            response.json[
+                'message'], "Product Quantity should be a positive value")
 
     def test_inventory_less_than_zero(self):
         '''Lower inventory of the products must be more than zero'''
@@ -154,8 +156,9 @@ class TestProducts(BaseTest):
             data=product,
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json[
-                         'message'], "Product price should be value greater than 0")
+        self.assertEqual(
+            response.json[
+                'message'], "Product price should be value greater than 0")
 
     def test_price_less_than_zero(self):
         '''Price of the products must be more than 0'''

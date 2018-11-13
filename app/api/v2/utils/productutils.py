@@ -3,7 +3,7 @@ import re
 from validate_email import validate_email
 from flask import make_response, jsonify, abort
 from ..models.productmodels import PostProduct
-from .productinput import ProductInput
+from ..views.productinput import ProductInput
 
 
 class ValidateProduct(ProductInput):
@@ -46,7 +46,7 @@ class ValidateProduct(ProductInput):
             message = "Product price should be greater than 0"
             abort(400, message)
         if int(self.quantity) < 0:
-            message = "Product Quantity should be a positive value value"
+            message = "Product Quantity should be a positive value"
             abort(400, message)
 
         if int(self.lower_inventory) < 0:

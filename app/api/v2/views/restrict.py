@@ -1,8 +1,12 @@
+'''This module declared the common return messages\
+for for validation'''
 from flask import jsonify, make_response, request
 
 
 class Restrict(object):
+    ''''Declare the commor return messages'''
     def __init__(self):
+        '''Initialize the response messages'''
         self.admin_only = make_response(jsonify({
             'Status': 'Failed',
             'message': "You must be an admin"

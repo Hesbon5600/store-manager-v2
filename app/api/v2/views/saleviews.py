@@ -74,7 +74,6 @@ class Sale(Resource):
                 post_sale.save_sale()
                 product['quantity'] = int(
                     product['quantity']) - int(product_quantity)
-                product_id = product_id
                 update_prod = PostProduct(product)
                 update_prod.update_product(product_id)
                 self.sale_obj = PostSale.get_all_sales(self)

@@ -5,7 +5,6 @@ from ..views.productinput import ProductInput
 
 class PostProduct(ProductInput):
     '''Save, get, and update products'''
-
     def __init__(self, data=None):
         super().__init__(data)
 

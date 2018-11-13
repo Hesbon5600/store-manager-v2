@@ -3,7 +3,7 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 from flask_expects_json import expects_json
 from .expected_json import PRODUCT_JSON
-from .productutils import ValidateProduct
+from ..utils.productutils import ValidateProduct
 from ..models.productmodels import PostProduct
 from .tokenrequired import token_required
 from .restrict import Restrict

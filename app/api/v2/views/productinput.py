@@ -1,4 +1,9 @@
+'''This module initialized the product data\
+thet will be used during product update and creation'''
+
+
 class ProductInput():
+    '''Superclass that initialized the product'''
     def __init__(self, data=None):
         '''Get the product data'''
         if data:
