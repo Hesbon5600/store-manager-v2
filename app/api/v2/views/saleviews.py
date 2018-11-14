@@ -18,8 +18,11 @@ class Sale(Resource, Restrict):
         '''Attendant can make a sale'''
         total = 0
         data = request.get_json()
-        if current_user and current_user['role'] != 'attendant':
-            return self.attendant_only
+        try:
+            if current_user['role'] != 'attendant':
+                return self.attendant_only
+        except:
+            return self.login_first
         try:
             product_quantity = int(data['product_quantity'])
         except:

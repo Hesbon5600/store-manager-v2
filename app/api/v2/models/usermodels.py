@@ -48,6 +48,8 @@ class User(Dtb):
 
     def update_user(self, user_id):
         '''Update user role to admin'''
+        self.user_id = user_id
+        self.role = 'admin'
         self.cur.execute(
             """UPDATE users SET role = %s WHERE user_id = %s""",
             (self.role, self.user_id),

@@ -127,7 +127,6 @@ class PromoteUser(Resource, Restrict):
         '''The initial role must be an attendant'''
         self.user_id = int(user_id)
         self.user_obj = User.get_all_users(self)
-        # data = request.get_json()
         if current_user and current_user['role'] != "admin":
             return self.admin_only
         for user in self.user_obj:

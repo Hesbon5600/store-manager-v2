@@ -1,5 +1,6 @@
 '''All database operations are handled here'''
 import os
+from flask import json
 import psycopg2
 from instance.config import Config
 
