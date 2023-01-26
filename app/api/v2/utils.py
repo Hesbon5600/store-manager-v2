@@ -1,4 +1,4 @@
-'''All the validations are handled here'''
+"""All the validations are handled here"""
 import re
 from validate_email import validate_email
 from flask import make_response, jsonify, abort
@@ -6,15 +6,16 @@ from .models import User, PostProduct
 
 
 class ValidateUser(User):
-    ''' Class that handles validating users input '''
+    """Class that handles validating users input"""
+
     def __init__(self, data):
-        self.username = data['username']
-        self.email = data['email']
-        self.password = data['password']
-        self.role = data['role']
+        self.username = data["username"]
+        self.email = data["email"]
+        self.password = data["password"]
+        self.role = data["role"]
 
     def validate_user_details(self):
-        ''' Check the input and eturn a message if an error is thrown '''
+        """Check the input and eturn a message if an error is thrown"""
         self.user_obj = User.get_all_users(self)
         if not validate_email(self.email):
             message = "Email is invalid"
@@ -71,56 +72,36 @@ class ValidateUser(User):
             abort(400, message)
 
 
-class ValidateProduct():
-    ''' Handles Product validation  '''
-    def __init__(self, data):
-        self.title = data['title']
-        self.category = data['category']
-        self.description = data['description']
-        self.quantity = data['quantity']
-        self.price = data['price']
-        self.lower_inventory = data['lower_inventory']
+class ValidateProduct:
+    """Handles Product validation"""
 
-    def validate_duplicates(self):
-        '''Ensure no product shares a name with another product.'''
-        '''Not called when updating a product'''
+    def __init__(self, data):
+        self.title = data["title"]
+        self.category = data["category"]
+        self.description = data["description"]
+        self.quantity = data["quantity"]
+        self.price = data["price"]
+        self.lower_inventory = data["lower_inventory"]
+
+    def validate_duplicates(self, product_id=None):
+        """Ensure no product shares a name with another product."""
+        """Not called when updating a product"""
         self.prod_obj = PostProduct.get_all_products(self)
         for product in self.prod_obj:
-            if product['title'] == self.title:
+            if product["title"] == self.title and product["product_id"] != product_id:
                 message = "Product: '" + self.title + "' already exists"
                 abort(406, message)
 
     def validate_product_details(self):
-        '''  '''
-        # if type(self.title) != str:
-        #     message = "Product title must be a string"
-        #     abort(400, message)
-
-        # if type(self.category) != str:
-        #     message = "Product Category must be a string"
-        #     abort(400, message)
-
-        # if type(self.description) != str:
-        #     message = "Product Description must be a string"
-        #     abort(400, message)
-
-        # if type(self.quantity) != int:
-        #     message = "Product quantity must be a real number"
-        #     abort(400, message)
+        """ """
         if self.quantity < 0:
             message = "Product Quantity should be a positive value value"
             abort(400, message)
 
-        if type(self.price) != float:
-            message = "Product price must be of the format 00.00"
-            abort(400, message)
         if self.price < 0:
             message = "Product price should be greater than 0"
             abort(400, message)
 
-        if type(self.lower_inventory) != int:
-            message = "Product lower inventory must be a whole number"
-            abort(400, message)
         if self.lower_inventory < 0:
             message = "Product price should be value greater than 0"
             abort(400, message)
