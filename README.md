@@ -76,7 +76,7 @@ make run
 
 
 # Testing with postman
-If you ran the application you can test the various api end points using postman. The appi endpoints are
+If you ran the application you can test the various api endpoints using postman. The appi endpoints are
 
 |Endpoint|functionality|contraints(requirements)|
 |-------|-------------|----------|
